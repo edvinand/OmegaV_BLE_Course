@@ -35,7 +35,7 @@ The aim of this tutorial is to simply create one service with two characteristic
 If you haven't done it already, start by setting up nRF Connect for Visual Studio code by setting the environment parameters. Under the nRF Connect tab in Visual Studio Code (VSC) click "Open welcome page" and click "Quick Setup". 
 Visual Studio Code settings | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/welcome_page.PNG" width="1000"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/welcome_page.PNG" width="1000"> |
 
 These are my settings, but the path may vary in your environment.
 </br>
@@ -45,7 +45,7 @@ Start by selecting *Create a new application from sample* in the *nRF Connect* -
 
 Setup Application from Sample | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/application_from_sample.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_from_sample.PNG"> |
 
 </br>
 Now we have copied the sample to our custom applications folder, but we need to create a build environment before we can compile and flash the sample to our board. 
@@ -60,7 +60,7 @@ If everything goes well, you should have flashed the *hello_world* sample to you
 
 Connect to board's UART | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/connect_uart.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/connect_uart.PNG"> |
 </br>
 A popup will occur with some UART settings. Just hit the enter key to select *115200 8n1*, and open the *NRF_TERMINAL* in your bottom terminal. It should print something like:
 *Hello World! nrf52840dk_nrf52840*
@@ -226,7 +226,7 @@ If you build your application you should see that the remote.c file appears unde
 
 Application Tree | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/application_tree.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_tree.PNG"> |
 
 </br>
 Open remote.c and add the line at the very top: </br>
@@ -283,7 +283,7 @@ After this sidetrack (rebuild/recompilation required), it is time to see what bt
 
 VSC Navigation | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/VSC_hint.png"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/VSC_hint.png"> |
 
 </br>
 
@@ -368,13 +368,13 @@ Now your device should advertise if you flash it with the latest build. Open nRF
 
 Scan uisng nRF Connect for Desktop | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/scan_advertisements.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements.PNG"> |
 
 *Note: In your case it probably will not say "Remote Service" in the Services field, but rather the UUID that you generated. If you want to save this custom UUID in nRF Connect for Desktop, click the gear icon (settings) on the nrf5x device, and select "Open UUID definitions file". See if you can copy the template of one of the services, and insert your own UUID.*
 
 Open the UUID definitions file | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/open_uuid_definitions_file.png"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/open_uuid_definitions_file.png"> |
 
 </br>
 </br>
@@ -397,9 +397,9 @@ struct bt_conn_cb bluetooth_callbacks = {
 </br>
 If you followed the guide this far, your files should look something like this. You can use this in case you got stuck somewhere. Please note that I also added some new code to the connected and disconnected events in main.c, and a current_conn parameter to keep track of the current connection. 
 </br>
-[main.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot1/main.c)</br>
-[remote.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot1/remote_service/remote.c)</br>
-[remote.h](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot1/remote_service/remote.h)</br>
+[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/main.c)</br>
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/remote_service/remote.c)</br>
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/remote_service/remote.h)</br>
 
 
 ### Step 4 - Adding our First Bluetooth Service
@@ -415,7 +415,7 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
 And voila! We have our first Bluetooth Low Energy service. Try to connect to it using nRF Connect, and see that you can see the service.
 Our first service | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/first_service.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/first_service.PNG"> |
 
 However, a service without any characteristics isn't very impressive. Let us add a characteristic that we can read from our Central. </br>
 We start by defining a new UUID for our characteristic. Basically, you can copy your previous UUID define and increment the two bytes that you set to 0001 to 0002:
@@ -470,9 +470,9 @@ ssize_t bt_gatt_attr_read(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 </br>
 </br>
 *Hint: If you are stuck, I uploaded another snapshot of the project here: 
-[main.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot2/main.c), 
-[remote.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot2/remote_service/remote.c), 
-[remote.h](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot2/remote_service/remote.h).*
+[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/main.c), 
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/remote_service/remote.c), 
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/remote_service/remote.h).*
 </br>
 </br>
 Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the refresh button in nRF Connect. Whenever you push a button on your DK and read it again, you should see that the is updated.
@@ -628,9 +628,9 @@ Now try to call this function from the button handler, check the return value an
 </br>
 </br>
 *In case you got stuck anywhere since the last snapshot, I'll upload a 3rd snapshot here:</br>
-[main.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot3/main.c)</br>
-[remote.c](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot3/remote_service/remote.c)</br>
-[remote.h](https://github.com/edvinand/bluetooth_intro/blob/main/temp_files/snapshot3/remote_service/remote.h)*
+[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/main.c)</br>
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.c)</br>
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.h)*
 
 ### Step 6 - Writing Bck to our Peripheral
 So now we can send notifications from our peripheral to our central. For a remote controller what more can you ask for? Well, let us say we want some sort of two way communication, where we want the central to be able to send messages back to the remote. Perhaps to read it out loud, toggle an LED when the TV is about to go to sleep, or perhaps you do not intend to develop a remote controller at all. We could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
@@ -731,7 +731,7 @@ If you are using nRF Connect for Desktop, unfortunately you can't write textstri
 
 Writing to a Characteristic in nRF Connect for Desktop | 
 ------------ |
-<img src="https://github.com/edvinand/bluetooth_intro/blob/main/images/123.png"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/123.png"> |
 
 </br>
 And you should hopefully see it printed in the log of your peripheral. 
@@ -743,4 +743,4 @@ You can find online string-to-hex generators online, such as [this one](https://
 </br>
 </br>
 
-You can find the final version of the files in the NCS project [here](https://github.com/edvinand/bluetooth_intro/tree/main/remote_controller).
+You can find the final version of the files in the NCS project [here](https://github.com/edvinand/OmegaV_BLE_Course/tree/main/remote_controller).
