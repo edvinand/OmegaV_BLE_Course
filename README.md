@@ -62,7 +62,9 @@ If everything goes well, you should have flashed the *hello_world* sample to you
 Connect to board's UART | 
 ------------ |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/connect_uart.PNG"> |
+
 </br>
+
 A popup will occur with some UART settings. Just hit the enter key to select *115200 8n1*, and open the *NRF_TERMINAL* in your bottom terminal. It should print something like:
 *Hello World! nrf52840dk_nrf52840*
 
