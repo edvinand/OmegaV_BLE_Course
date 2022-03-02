@@ -118,7 +118,7 @@ Open dk_buttons_and_leds.h to see if there is any ways you can turn on and off t
 *Hint: You can use k_sleep() to wait a given amount of time, and there is a macro called K_MSEC() that takes an input of ms, and converts it to ticks.*
 
 Now, let us look for a function that can enable the buttons in the dk_and_leds_init.h file. Remember to check the return value of the button init function. </br>
-*Hint: As this function initializes our buttons, it has an input parameter which is a handler.* 
+*Hint: As this function initializes our buttons, it has an input parameter which is a callback handler.* 
 </br> 
 In your button handler try using the log module to print something whenever it is called. We will tweak it later.
 </br>
