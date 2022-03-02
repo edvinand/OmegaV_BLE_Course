@@ -2,7 +2,7 @@
 
 # Bluetooth_Low_Energy_Introduction
 
-**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (1.7.1 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
+**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (1.9.0 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
 Start by adding the "hello_world" sample from *NCS\zephyr\samples\hello_world* as an application in nRF Connect for Visual Studio Code. </br></br>
 
 # HW requirements
