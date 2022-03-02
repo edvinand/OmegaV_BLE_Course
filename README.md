@@ -90,8 +90,15 @@ Compile and flash the application again, and you should see that it still prints
 </br>
 
 #### Configure buttons and LEDs
-Before we start adding Bluetooth, we want to set up some LEDs that we can use to indicate that our application is still running, and hasn't crashed, and some buttons that we can use later to trigger certain BLE calls.
+Before we start adding Bluetooth, we want to set up some LEDs that we can use to indicate that our application is still running, and hasn't crashed. We also want to set up some buttons that we can use later to trigger certain BLE calls.
 Start by including <dk_buttons_and_leds.h> in your main.c file.
+
+<br>
+
+*Hint: If you write `#include <dk_buttons_and_leds.h>` in your main.c file, and then right click it and select "Go to definition", it will open that file.*
+
+<br>
+
 Next, create a function to initiate the LEDs and buttons. I will call mine `static void configure_dk_buttons_leds(void)`.
 The first thing we need to do in this function is to enable the LEDs. Looking in dk_buttons_and_leds.h, we can look for a function that does about that. Try adding `dk_leds_init()` to your configure_dk_buttons_leds() function. Since this function returns and int, we would like to check the return value. 
 
