@@ -48,6 +48,7 @@ Setup Application from Sample |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_from_sample.PNG"> |
 
 </br>
+
 Now we have copied the sample to our custom applications folder, but we need to create a build environment before we can compile and flash the sample to our board. 
 Below the *nRF Connect* -> *APPLICATIONS* tab, expand the "remote_controller" application, and click the *No build configurations*, which will create a new build configuration.
 The only thing you need to do here is to set the board that you are using. Depending on the board you are using, you need to enter the NCS name of the DK:
