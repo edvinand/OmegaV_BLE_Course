@@ -281,7 +281,7 @@ What we do here is:
 After this sidetrack (rebuild/recompilation required), it is time to see what bt_enable does. In nRF Connect for VS Code, if you hold ctrl and hover bt_enable(), you should see the declaration of the function. If you ctrl click it, it should bring you to the definition. We can use this to see what it returns and what input parameters it takes.
 </br>
 
-VSC Navigation | 
+Visual Studio Code Navigation | 
 ------------ |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/VSC_hint.png"> |
 
