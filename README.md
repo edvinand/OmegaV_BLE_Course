@@ -91,7 +91,7 @@ Compile and flash the application again, and you should see that it still prints
 
 #### Configure buttons and LEDs
 Before we start adding Bluetooth, we want to set up some LEDs that we can use to indicate that our application is still running, and hasn't crashed. We also want to set up some buttons that we can use later to trigger certain BLE calls.
-Start by including <dk_buttons_and_leds.h> in your main.c file.
+Start by including `<dk_buttons_and_leds.h>` in your main.c file.
 
 <br>
 
@@ -100,7 +100,7 @@ Start by including <dk_buttons_and_leds.h> in your main.c file.
 <br>
 
 Next, create a function to initiate the LEDs and buttons. I will call mine `static void configure_dk_buttons_leds(void)`.
-The first thing we need to do in this function is to enable the LEDs. Looking in dk_buttons_and_leds.h, we can look for a function that does about that. Try adding `dk_leds_init()` to your configure_dk_buttons_leds() function. Since this function returns and int, we would like to check the return value. 
+The first thing we need to do in this function is to enable the LEDs. Looking in `dk_buttons_and_leds.h`, we can look for a function that does about that. Try adding `dk_leds_init()` to your configure_dk_buttons_leds() function. Since this function returns and int, we would like to check the return value. 
 
 ```C
     int err;
@@ -109,20 +109,25 @@ The first thing we need to do in this function is to enable the LEDs. Looking in
         LOG_ERR("Couldn't init LEDS (err %d)", err);
     }
 ```
+
+<br>
+
+You may see that if you try to compile the sample after adding a function from the `dk_buttons_and_leds.h`
+
 Let us add a specific LED and a blinking interval near the top of main.c
 ```C
 #define RUN_STATUS_LED DK_LED1
 #define RUN_LED_BLINK_INTERVAL 1000
 ```
-Open dk_buttons_and_leds.h to see if there is any ways you can turn on and off this LED from your main function. Our goal is to toggle the LED in a `for(;;)` loop (equivalent to a while(true) loop). There are several ways to do this. Try to find one that works. </br>
+Open `dk_buttons_and_leds.h` to see if there is any ways you can turn on and off this LED from your main function. Our goal is to toggle the LED in a `for(;;)` loop (equivalent to a while(true) loop). There are several ways to do this. Try to find one that works. </br>
 *Hint: You can use k_sleep() to wait a given amount of time, and there is a macro called K_MSEC() that takes an input of ms, and converts it to ticks.*
 
-Now, let us look for a function that can enable the buttons in the dk_and_leds_init.h file. Remember to check the return value of the button init function. </br>
+Now, let us look for a function that can enable the buttons in the `dk_buttons_and_leds.h` file. Remember to check the return value of the button init function. </br>
 *Hint: As this function initializes our buttons, it has an input parameter which is a callback handler.* 
 </br> 
 In your button handler try using the log module to print something whenever it is called. We will tweak it later.
 </br>
-If you try to build your application at this point, you will see that it fails because it can't find any references to your LED or buttons init function, even though you included dk_buttons_and_leds.h. The reason for this is that we didn't include the dk_buttons_and_leds.c file. We need to tell our application to do so. There are two ways of doing this. If you create your own files, you can add them manually, which we will do later for some custom files. But for now we want to add a file that belongs to NCS, and therefore we include it using configuration switches. 
+If you try to build your application at this point, you will see that it fails because it can't find any references to your LED or buttons init function, even though you included `dk_buttons_and_leds.h`. The reason for this is that we didn't include the dk_buttons_and_leds.c file. We need to tell our application to do so. There are two ways of doing this. If you create your own files, you can add them manually, which we will do later for some custom files. But for now we want to add a file that belongs to NCS, and therefore we include it using configuration switches. 
 </br>
 In prj.conf, add the following:
 ```
