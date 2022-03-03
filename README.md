@@ -241,7 +241,10 @@ void main(void)
 }
 ```
 
-### Step 3 - Adding Bluetooth
+### Step 3 - Motor control
+Write a section on motor control
+
+### Step 4 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
 </br>
 </br>
@@ -438,7 +441,7 @@ If you followed the guide this far, your files should look something like this. 
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/remote_service/remote.h)</br>
 
 
-### Step 4 - Adding our First Bluetooth Service
+### Step 5 - Adding our First Bluetooth Service
 Let us add the service that we claim that we have when we advertise. We will use the macro BT_GATT_SERVICE_DEFINE to add our service. It is quite simple at the same time as it is quite complex. When we use this macro to create and add our service, the rest is done "under the hood" of NCS/Zephyr. By just adding this snippet to remote.c
 
 ```C
@@ -514,7 +517,7 @@ ssize_t bt_gatt_attr_read(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the refresh button in nRF Connect. Whenever you push a button on your DK and read it again, you should see that the is updated.
 
 
-### Step 5 - Characteristic Notifications
+### Step 6 - Characteristic Notifications
 When we are working on low energy devices, and a remote controller, it is not very efficient nor user friendly to have to ask the remote what the status of the last pressed button is. It would be a tradeoff between a long latency and a high current consumption. Therefore we have something called "notifications", which allows the peripheral to push changes to the central whenever they occur. This is set using something called Client Characteristic Configuration Descriptor (CCCD or CCC). The first thing we need to do is to add this descriptor to our characteristic. Do this by adding the last line to your Service macro in remote.c:
 
 ```C
@@ -668,7 +671,7 @@ Now try to call this function from the button handler, check the return value an
 [remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.c)</br>
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.h)*
 
-### Step 6 - Writing Bck to our Peripheral
+### Step 7 - Writing Bck to our Peripheral
 So now we can send notifications from our peripheral to our central. For a remote controller what more can you ask for? Well, let us say we want some sort of two way communication, where we want the central to be able to send messages back to the remote. Perhaps to read it out loud, toggle an LED when the TV is about to go to sleep, or perhaps you do not intend to develop a remote controller at all. We could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
 
 **Todo:**</br>
