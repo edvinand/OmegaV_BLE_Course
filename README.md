@@ -272,7 +272,7 @@ If you right click `"motor_control.h"` that you just wrote and click "Go to Defi
 ```
 
 **Challenge:** </br>
-Now, try to create a function called motor_init() in your motor_control.c file, that you also need to declare in `motor_control.h`. Make the function return 0, and check this return value in `main()`. Add whatever that is needed in these two files so that you can use this function to log *"Initializing Motor"* to our log. Remember to include `remote.h` from your main.c file.
+Now, try to create a function called motor_init() in your motor_control.c file, that you also need to declare in `motor_control.h`. Make the function return 0, and check this return value in `main()`. Add whatever that is needed in these two files so that you can use this function to print *"Initializing Motor Control"* to our log. Remember to include `remote.h` from your main.c file.
 </br>
 *Hint 1: You shouldn't need to include any more files in motor_control.c.*
 </br>
@@ -280,7 +280,52 @@ Now, try to create a function called motor_init() in your motor_control.c file, 
 </br>
 
 
-When we are using the nRF Connect SDK, we have several driver options to control the PWM. 
+**PWM control**
+When we are using the nRF Connect SDK, we have several driver options to control the PWM. We have our own drivers that are tailored for the Nordic Semiconductor devices, or we can use Zephyr's drivers, which will use Nordic's drivers beneath the hood. In this tutorial we will use Nordic's drivers directly, for simplicity. 
+Let us start by adding some configurations to our prj.conf file:
+
+```C
+# PWM
+CONFIG_PWM=y
+CONFIG_NRFX_PWM1=y
+```
+
+What we are doig here is that we enable the PWM in general, and we tell it to use PWM instance 1.
+Then we can continue by adding the pwm header file near the top of `motor_control.h`. `motor_control.c` will inherit this, as long as it includes `motor_control.h`.
+
+```C
+#include "nrfx_pwm.h"
+```
+
+Open `nrfx_pwm.h` and see if you can find a function that will initialize the PWM driver. `nrfx_err_t nrfx_pwm_init(...)` looks promising. This function has 4 parameters. We only need the first two. The rest we can set to NULL, as we don't need any callbacks or context pointer to pass on to the callback. 
+The first parameter is the pointer to an instance. We can use the macro *NRFX_PWM_INSTANCE()* (from nrfx_pwm.h) to define this instance. The second parameter is the configuration that we want to use. The configuration holds information such as the pin number, the PWM frequency, and so on. We can use another macro, *NRFX_PWM_DEFAULT_CONFIG* to set most things, and then we can tweak it later. 
+
+```C
+// Near the top of motor_control.c:
+#define SERVO_PIN                           16//27
+#define PWM_PERIOD                          20000
+static nrfx_pwm_t pwm = NRFX_PWM_INSTANCE(1);
+
+// implementation of motor_init():
+int motor_init(void)
+{
+    LOG_INF("Initializing Motor Control");
+
+    nrfx_err_t err;
+    nrfx_pwm_config_t pwm_config = NRFX_PWM_DEFAULT_CONFIG(SERVO_PIN | NRFX_PWM_PIN_INVERTED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED);
+    pwm_config.top_value        = PWM_PERIOD;
+    
+    err = nrfx_pwm_init(&pwm, &pwm_config, NULL, NULL);
+    if (err != NRFX_SUCCESS) {  // NB: NRFX_SUCCESS != 0
+        LOG_ERR("nrfx_pwm_init() failed, err %d", err);
+        return err;
+    }
+    
+    return 0;
+
+}
+
+```
 
 
 ### Step 4 - Adding Bluetooth
