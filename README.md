@@ -151,7 +151,7 @@ typedef void (*callback_handler)(uint8_t first_parameter, uint16_t second_parame
 *it means that you can define your callback e.g. like this:*
 
 ```C
-void my_callback_function(uin8_t my_8_bit_parameter, uint16_t my_16_bit_parameter)
+void my_callback_function(uint8_t my_8_bit_parameter, uint16_t my_16_bit_parameter)
 ```
 
 *You would probably choose some different names for the function and the parameters, but this is an example on how to interpret the callback typedefs.*
