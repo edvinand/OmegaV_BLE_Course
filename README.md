@@ -323,21 +323,24 @@ int motor_init(void)
 {
     LOG_INF("Initializing Motor Control");
 
+    //set_gpio_voltage();
+
     nrfx_err_t err;
-    nrfx_pwm_config_t pwm_config = NRFX_PWM_DEFAULT_CONFIG(SERVO_PIN | NRFX_PWM_PIN_INVERTED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED);
-    pwm_config.top_value        = PWM_PERIOD;
+    nrfx_pwm_config_t pwm_config    = NRFX_PWM_DEFAULT_CONFIG(SERVO_PIN, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED);
+    pwm_config.top_value            = PWM_PERIOD;
+    pwm_config.load_mode            = NRF_PWM_LOAD_INDIVIDUAL;
     
     err = nrfx_pwm_init(&pwm, &pwm_config, NULL, NULL);
     if (err != NRFX_SUCCESS) {  // NB: NRFX_SUCCESS != 0
         LOG_ERR("nrfx_pwm_init() failed, err %d", err);
-        return err;
     }
     
     return 0;
-
 }
 
 ```
+
+In theory (!) our motor is now operational as soon as you connect it. The brown wire is GND, the red is VDD and the orange is the PWM signal. However, we haven't actually told the PWM driver to set a PWM signal yet. Let us start by adding this to our motor_init() function to test that it works. Look for nrfx_pwm_simple_playback() in nrfx_pwm.h, and see if you can apply it to set the PWM signal of your motor. 
 
 
 ### Step 4 - Adding Bluetooth
