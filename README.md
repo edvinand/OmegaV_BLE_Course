@@ -323,8 +323,6 @@ int motor_init(void)
 {
     LOG_INF("Initializing Motor Control");
 
-    //set_gpio_voltage();
-
     nrfx_err_t err;
     nrfx_pwm_config_t pwm_config    = NRFX_PWM_DEFAULT_CONFIG(SERVO_PIN, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED);
     pwm_config.top_value            = PWM_PERIOD;
@@ -341,7 +339,11 @@ int motor_init(void)
 ```
 
 In theory (!) our motor is now operational as soon as you connect it. Connect the brown wire to GND, the red wire to VDD and the orange to the PWM signal pin (P0.03). However, we haven't actually told the PWM driver to set a PWM signal yet. Let us start by adding this to our motor_init() function to test that it works. Look for nrfx_pwm_simple_playback() in nrfx_pwm.h, and see if you can apply it to set the PWM signal of your motor. Remember to call nrfx_pwm_simple_playback before your `return 0;`.
+How to set this frequency is not trivial, since the second parameter is a double pointer to the actual duty cycle, so we will walk through it. If you want to try for yourself, you can stop reading here, and look into the `nrfx_pwm.h` file. 
 
+<br>
+
+The nrfx_pwm_simple_playback() expects a pointer to a nrf_pwm_sequence_t parameter. This parameter holds an array to the actual values, which can be a sequence. We will only use one value in this array. It also holds the length of the array, the number of repeats these values will be played, and then how long the last PWM value should be held. With all these 
 
 ### Step 4 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
