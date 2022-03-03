@@ -142,7 +142,19 @@ Open `dk_buttons_and_leds.h` to see if there is any ways you can turn on and off
 Now, let us look for a function that can enable the buttons in the `dk_buttons_and_leds.h` file. Remember to check the return value of the button init function. When you have a button handler set up, try to use it to print something in the log, so that we can see that it triggers correctly. We can tweak the button handler later.
 </br>
 
-*Hint: As this function initializes our buttons, it has an input parameter which is a callback handler.* 
+*Hint: As this function initializes our buttons, it has an input parameter which is a callback handler. Use the "Go to definition" on the button handler type to see what kind of callback function it expects. If the button handler type that is expected is defined like this:* 
+
+```C
+typedef void (*callback_handler)(uint8_t first_parameter, uint16_t second_parameter);
+```
+
+*it means that you can define your callback e.g. like this:*
+
+```C
+void my_callback_function(uin8_t my_8_bit_parameter, uint16_t my_16_bit_parameter)
+```
+
+*You would probably choose some different names for the function and the parameters, but this is an example on how to interpret the callback typedefs.*
 
 </br>
 
