@@ -300,9 +300,21 @@ Then we can continue by adding the pwm header file near the top of `motor_contro
 Open `nrfx_pwm.h` and see if you can find a function that will initialize the PWM driver. `nrfx_err_t nrfx_pwm_init(...)` looks promising. This function has 4 parameters. We only need the first two. The rest we can set to NULL, as we don't need any callbacks or context pointer to pass on to the callback. 
 The first parameter is the pointer to an instance. We can use the macro *NRFX_PWM_INSTANCE()* (from nrfx_pwm.h) to define this instance. The second parameter is the configuration that we want to use. The configuration holds information such as the pin number, the PWM frequency, and so on. We can use another macro, *NRFX_PWM_DEFAULT_CONFIG* to set most things, and then we can tweak it later. 
 
+<br>
+
+Short background: The way that the PWM works is that it is a counter counting from 0 to .top_value at the speed of 1MHz. 
+When it reaches our threshold/pwm_duty_cycle (which we will set later) it will set the pin in active state, and when the counter's .top_value is reached, it puts the pin in inactive state, and resets the counter. 
+<br>
+If you study the configuration in *NRFX_PWM_DEFAULT_CONFIG* in nrfx_pwm.h, we see that most of these are ok. What we need to adjust a few things. The PWM period that we want to use is 20ms = 20000µs. Since our PWM clock is running at 1MHz (from *NRFX_PWM_DEFAULT_CONFIG*), we want to set our config's .top_value = 20000. 
+We also want to set the parameter .load_mode. I will not go into details, but it has to do with how many bits in a pwm value that is used. The last thing we want to decide is what GPIO pin that we will use for the PWM signal. 
+If you look at the backside of the DK, you can see that some of the pins are used for LEDs, buttons, NFC, serial communication, etc. Try to avoid these. P0.03 (and close to both GND and VDD), so we can use that. 
+
+
+
+
 ```C
 // Near the top of motor_control.c:
-#define SERVO_PIN                           16//27
+#define SERVO_PIN                           3
 #define PWM_PERIOD                          20000
 static nrfx_pwm_t pwm = NRFX_PWM_INSTANCE(1);
 
