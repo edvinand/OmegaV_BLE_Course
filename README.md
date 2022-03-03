@@ -343,7 +343,45 @@ How to set this frequency is not trivial, since the second parameter is a double
 
 <br>
 
-The nrfx_pwm_simple_playback() expects a pointer to a nrf_pwm_sequence_t parameter. This parameter holds an array to the actual values, which can be a sequence. We will only use one value in this array. It also holds the length of the array, the number of repeats these values will be played, and then how long the last PWM value should be held. With all these 
+The nrfx_pwm_simple_playback() expects a pointer to a nrf_pwm_sequence_t parameter. It also holds a parameter indicating the length of this array. This is all we will use, and we will set the rest to 0. The array with the PWM values is a parameter with the type nrf_pwm_sequence_t, so let us start by implementing this near the top of motor_control.c:
+
+```C
+static  nrf_pwm_values_inidividual_t position_1[] = {
+    {19000},
+};
+static  nrf_pwm_values_inidividual_t position_1[] = {
+    {18000},
+};
+```
+
+You may remember that our datasheet said that the PWM duty cycle should be between 1ms and 2ms. This would be 1000 and 2000 ticks in our case. However, this PWM driver has an active low configuration, so the easiest workaround for this is to just say that the duty cycle is the period minus the actual duty cycle. So for 1ms that would be 20000 - 1 = 19000. 
+
+Then we will implement the nrf_pwm_sequence_t parameter, which uses the nrf_pwm_values_individual_t:
+
+```C
+static nrf_pwm_sequence_t position_1_sequence = {
+    .values.p_individual    = position_1,
+    .length                 = NRF_PWM_VALUES_LENGTH(position_1),
+    .repeats                = 0,
+    .end_delay              = 0
+};
+static nrf_pwm_sequence_t position_2_sequence = {
+    .values.p_individual    = position_2,
+    .length                 = NRF_PWM_VALUES_LENGTH(position_2),
+    .repeats                = 0,
+    .end_delay              = 0
+};
+```
+
+Now we can finally use these "sequences" to set the angle of our motor by adding this line to our motot_init():
+```C
+nrfx_pwm_simple_playback(&pwm, &position_1_sequence, 50, NRFX_PWM_FLAG_STOP);
+```
+
+This will cause the motor to go to "position 1", and stay there for 50 PWM periods (1 second), and then turn off. 
+
+**Challenge:**
+Use what you now know to make two of the buttons in the button handler to make the motor switch between the two positions "position_1" and "position_2".
 
 ### Step 4 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
