@@ -122,14 +122,10 @@ Let us add a specific LED and a blinking interval near the top of main.c
 Open `dk_buttons_and_leds.h` to see if there is any ways you can turn on and off this LED from your main function. Our goal is to toggle the LED in a `for(;;)` loop (equivalent to a while(true) loop). There are several ways to do this. Try to find one that works. </br>
 *Hint: You can use k_sleep() to wait a given amount of time, and there is a macro called K_MSEC() that takes an input of ms, and converts it to ticks.*
 
-Now, let us look for a function that can enable the buttons in the `dk_buttons_and_leds.h` file. Remember to check the return value of the button init function. 
+Now, let us look for a function that can enable the buttons in the `dk_buttons_and_leds.h` file. Remember to check the return value of the button init function. When you have a button handler set up, try to use it to print something in the log, so that we can see that it triggers correctly. We can tweak the button handler later.
 </br>
 
 *Hint: As this function initializes our buttons, it has an input parameter which is a callback handler.* 
-
-</br> 
-
-In your button handler try using the log module to print something whenever it is called. We will tweak it later.
 
 </br>
 
