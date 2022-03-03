@@ -255,6 +255,31 @@ target_sources(app PRIVATE
 zephyr_library_include_directories(src/custom_files)
 ```
 
+Application Tree | 
+------------ |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_tree.PNG"> |
+
+If all goes well, the project should compile, and we should be able to see our motor_control.c in our application tree. Open `motor_control.c` and start by adding this line to the very top:
+
+```C
+#include "motor_control.h"
+```
+
+If you right click `"motor_control.h"` that you just wrote and click "Go to Definition" it should open the `motor_control.h` file in Visual Studio Code. In this header file, add:
+```C
+#include <zephyr.h>
+#include <logging/log.h>
+```
+
+**Challenge:** </br>
+Now, try to create a function called motor_init() in your motor_control.c file, that you also need to declare in `motor_control.h`. Make the function return 0, and check this return value in `main()`. Add whatever that is needed in these two files so that you can use this function to log *"Initializing Motor"* to our log. Remember to include `remote.h` from your main.c file.
+</br>
+*Hint 1: You shouldn't need to include any more files in motor_control.c.*
+</br>
+*Hint 2: Give motor_control.c another log module name, so that it is easy to see from the log what file that printed what lines.*
+</br>
+
+
 When we are using the nRF Connect SDK, we have several driver options to control the PWM. 
 
 
