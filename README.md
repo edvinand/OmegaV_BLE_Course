@@ -112,13 +112,28 @@ The first thing we need to do in this function is to enable the LEDs. Looking in
 
 <br>
 
-You may see that if you try to compile the sample after adding a function from the `dk_buttons_and_leds.h`
+You may see that if you try to compile the sample after adding a function from the `dk_buttons_and_leds.h`, it will fail. The reason for this is that while we included the `dk_buttons_and_leds.h`, we didn't include the dk_buttons_and_leds.c file yet. This means that the compiler will not find the definitions of the functions that the header file claims that we have. We need to tell our application how to add the `dk_buttons_and_leds.c` file. There are two ways of doing this. If you create your own files, you can add them manually, which we will do later for some custom files. But for now we want to add a file that belongs to NCS, and therefore we include it using configuration switches.
+
+<br>
+
+in `prj.conf`, add the following:
+
+```
+# Configure buttons and LEDs.
+CONFIG_GPIO=y
+CONFIG_DK_LIBRARY=y
+```
 
 Let us add a specific LED and a blinking interval near the top of main.c
 ```C
 #define RUN_STATUS_LED DK_LED1
 #define RUN_LED_BLINK_INTERVAL 1000
 ```
+
+This snippet will enable the GPIOs and include the DK library. The way this is done in NCS/Zephyr is a bit complex. If you are interrested in how this works, you can look into the CMakeLists.txt file found in NCS\nrf\lib\CMakeLists.txt, and see how it includes stuff based on the configurations. For now we will accept that this is just how it works.
+After adding the configurations in prj.conf your project should compile, and something should be printed in the log whenever you press or release a button. Remember to call `configure_dk_buttons_leds()` in your main() function.
+
+
 Open `dk_buttons_and_leds.h` to see if there is any ways you can turn on and off this LED from your main function. Our goal is to toggle the LED in a `for(;;)` loop (equivalent to a while(true) loop). There are several ways to do this. Try to find one that works. </br>
 *Hint: You can use k_sleep() to wait a given amount of time, and there is a macro called K_MSEC() that takes an input of ms, and converts it to ticks.*
 
@@ -126,22 +141,6 @@ Now, let us look for a function that can enable the buttons in the `dk_buttons_a
 </br>
 
 *Hint: As this function initializes our buttons, it has an input parameter which is a callback handler.* 
-
-</br>
-
-If you try to build your application at this point, you will see that it fails because it can't find any references to your LED or buttons init function, even though you included `dk_buttons_and_leds.h`. The reason for this is that we didn't include the dk_buttons_and_leds.c file. We need to tell our application to do so. There are two ways of doing this. If you create your own files, you can add them manually, which we will do later for some custom files. But for now we want to add a file that belongs to NCS, and therefore we include it using configuration switches. 
-
-</br>
-
-In prj.conf, add the following:
-
-```
-# Configure buttons and LEDs.
-CONFIG_GPIO=y
-CONFIG_DK_LIBRARY=y
-```
-This snippet will enable the GPIOs and include the DK library. The way this is done in NCS/Zephyr is a bit complex. If you are interrested in how this works, you can look into the CMakeLists.txt file found in NCS\nrf\lib\CMakeLists.txt, and see how it includes stuff based on the configurations. For now we will accept that this is just how it works.
-After adding the configurations in prj.conf your project should compile, and something should be printed in the log whenever you press or release a button. Remember to call `configure_dk_buttons_leds()` in your main() function.
 
 </br>
 If you successfully compiled your application and flash it, you should now see that LED1 toggles every second, and that you receive a callback whenever a button is pressed or released.
