@@ -354,7 +354,7 @@ static  nrf_pwm_values_inidividual_t position_1[] = {
 };
 ```
 
-You may remember that our datasheet said that the PWM duty cycle should be between 1ms and 2ms. This would be 1000 and 2000 ticks in our case. However, this PWM driver has an active low configuration, so the easiest workaround for this is to just say that the duty cycle is the period minus the actual duty cycle. So for 1ms that would be 20000 - 1 = 19000. 
+You may remember that our motor's datasheet said that the PWM duty cycle should be between 1ms and 2ms on logic high, and low for the rest of the period. This would be 1000 and 2000 ticks in our case. However, this PWM driver has an active low configuration, so the easiest workaround for this is to just say that the duty cycle is the period minus the actual duty cycle. So for 1ms that would be 20000 - 1000 = 19000. 
 
 Then we will implement the nrf_pwm_sequence_t parameter, which uses the nrf_pwm_values_individual_t:
 
@@ -373,7 +373,7 @@ static nrf_pwm_sequence_t position_2_sequence = {
 };
 ```
 
-Now we can finally use these "sequences" to set the angle of our motor by adding this line to our motot_init():
+Now we can finally use these "sequences" to set the angle of our motor by adding this line to our `motor_init()`:
 ```C
 nrfx_pwm_simple_playback(&pwm, &position_1_sequence, 50, NRFX_PWM_FLAG_STOP);
 ```
@@ -388,24 +388,21 @@ Use what you now know to make two of the buttons in the button handler from main
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
 </br>
 </br>
-Because we want to keep our main.c file as clutter free as possible, we will try to do most of the bluetooth configuration and handling in another file, and only push certain events back to main.c. Therefore we will start by adding a few custom files. Create a folder named `remote_service` inside your application folder: *remote_controller\src\remote_service\.* You can either do this from VSC or your operating system. Inside this folder, create two files: `remote.h` and `remote.c`. To include these custom files to your project, open CMakeLists.txt, and add the following snippet at the end:
+Because we want to keep our main.c clean, we will try to do most of the bluetooth configuration and handling in another file, just like we did with PWM. Therefore we will start by adding some more custom files. Inside the `remote_service` folder, create two more files: `remote.h` and `remote.c`. To include these custom files to your project, open CMakeLists.txt, add on to what we changed earlier:
 
 ```C
 # Custom files and folders
 
 target_sources(app PRIVATE
-    src/remote_service/remote.c
+    src/custom_files/motor_control.c;
+    src/custom_files/remote.c
 )
 
-zephyr_library_include_directories(src/remote_service)
+zephyr_library_include_directories(src/custom_files)
 ```
-*If you wanted to add more .c files, you could do so by separating them using `;` after `remote.c`. and have one file per line.*
-</br>
-If you build your application you should see that the remote.c file appears under your *REMOTE_CONTROLLER* tab:
 
-Application Tree | 
------------- |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_tree.PNG"> |
+</br>
+When you build your application again, you should see remote.c appear next to motor_control.c.
 
 </br>
 Open remote.c and add the line at the very top: </br>
@@ -414,18 +411,14 @@ Open remote.c and add the line at the very top: </br>
 #include "remote.h"
 ```
 
-If you right click "remote.h" that you just wrote, and click "Go to Definition" it should open the remote.h file in VSC. In remote.h, add:
+And in `remote.h`, add the following:
 
 ```C
 #include <zephyr.h>
 #include <logging/log.h>
 ```
 
-Now, try to create a function called `bluetooth_init()` in your remote.c file that you also need to declare in remote.h. Make the function return `0`, and check this return value in `main()`. Add whatever is needed in these two files so that you can use this function to log "Initializing Bluetooth". Remember to include remote.h from your main.c file.
-</br>
-*Hint 1: You shouldn't need to include any more files in remote.c.*
-</br>
-*Hint 2: Give remote.c another log module name, so that it is easy to see from the log what file that printed what lines.*
+Now, try to create a function called `bluetooth_init()` in your remote.c file that you also need to declare in remote.h. Make the function return `0`, and check this return value in `main()`. Just like before, add whatever is needed in these two files so that you can use this function to log "Initializing Bluetooth". Remember to include remote.h from your main.c file.
 </br>
 
 
@@ -453,11 +446,11 @@ What we do here is:
 - Support the peripheral (advertising) role
 - Set our device_name, which we will use later
 - Set the appearance. Look in the description of this configuration to see what this does.
-- Set the maximum simultaneous connections to 1.
+- Set the maximum number of simultaneous connections to 1.
 - Tell it to use the Nordic Softdevice Controller. 
 
 </br>
-After this sidetrack (rebuild/recompilation required), it is time to see what bt_enable does. In nRF Connect for VS Code, if you hold ctrl and hover bt_enable(), you should see the declaration of the function. If you ctrl click it, it should bring you to the definition. We can use this to see what it returns and what input parameters it takes.
+After this (rebuild required), it is time to see what bt_enable does. In nRF Connect for VS Code, if you hold ctrl and hover bt_enable(), you should see the declaration of the function. If you ctrl click it, it should bring you to the definition. We can use this to see what it returns and what input parameters it takes.
 </br>
 
 Visual Studio Code Navigation | 
