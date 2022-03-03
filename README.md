@@ -244,7 +244,16 @@ void main(void)
 ### Step 3 - Motor control
 Time to add some movement to our PWM motor. The motor that we used is the Tower Pro SG90. You can find a very simplified datasheet [here](http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf). For some background information on how PWM motors work, you can check out [this guide](https://www.jameco.com/Jameco/workshop/Howitworks/how-servo-motors-work.html).
 Basically, we want to output a PWM signal, and the duty cycle of the PWM signal determines what angle/position the rotor will maintain. In our case, the motor wants a duty cycle between 1 and 2 ms, and a PWM period of 20ms. 
-Because we want to keep main.c as clutter free as possible, we will try to do most of the PWM configurations and handling in another file, and implement some simple functions that we can call from main.c. Therefore we will start by adding a few custom files. Create a folder named `motor_control` inside your application folder: *remote_controller\src\motor_control*
+Because we want to keep main.c as clutter free as possible, we will try to do most of the PWM configurations and handling in another file, and implement some simple functions that we can call from main.c. Therefore we will start by adding a few custom files. Create a folder named `custom_files` inside your application folder: *remote_controller\src\custom_files*. You can either do this from Visual Studio Code or from your operating system. Inside this folder create two new files: `motor_control.h` and `motor_control.c`. To include these custom files to your project, open CMakeLists.txt, and add the following snippet at the end:
+```C
+# Custom files and folders
+
+target_sources(app PRIVATE
+    src/custom_files/motor_control.c
+)
+
+zephyr_library_include_directories(src/custom_files)
+```
 
 When we are using the nRF Connect SDK, we have several driver options to control the PWM. 
 
