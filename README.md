@@ -340,7 +340,7 @@ int motor_init(void)
 
 ```
 
-In theory (!) our motor is now operational as soon as you connect it. The brown wire is GND, the red is VDD and the orange is the PWM signal. However, we haven't actually told the PWM driver to set a PWM signal yet. Let us start by adding this to our motor_init() function to test that it works. Look for nrfx_pwm_simple_playback() in nrfx_pwm.h, and see if you can apply it to set the PWM signal of your motor. 
+In theory (!) our motor is now operational as soon as you connect it. Connect the brown wire to GND, the red wire to VDD and the orange to the PWM signal pin (P0.03). However, we haven't actually told the PWM driver to set a PWM signal yet. Let us start by adding this to our motor_init() function to test that it works. Look for nrfx_pwm_simple_playback() in nrfx_pwm.h, and see if you can apply it to set the PWM signal of your motor. Remember to call nrfx_pwm_simple_playback before your `return 0;`.
 
 
 ### Step 4 - Adding Bluetooth
