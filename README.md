@@ -382,7 +382,7 @@ This will cause the motor to go to "position 1", and stay there for 50 PWM perio
 
 **Challenge:**
 <br>
-Use what you now know to make two of the buttons in the button handler to make the motor switch between the two positions "position_1" and "position_2".
+Use what you now know to make two of the buttons in the button handler from main.c control the motor between "position_1" and "position_2"
 
 ### Step 4 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
