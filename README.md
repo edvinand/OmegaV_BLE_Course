@@ -381,6 +381,7 @@ nrfx_pwm_simple_playback(&pwm, &position_1_sequence, 50, NRFX_PWM_FLAG_STOP);
 This will cause the motor to go to "position 1", and stay there for 50 PWM periods (1 second), and then turn off. 
 
 **Challenge:**
+<br>
 Use what you now know to make two of the buttons in the button handler to make the motor switch between the two positions "position_1" and "position_2".
 
 ### Step 4 - Adding Bluetooth
