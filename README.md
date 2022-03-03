@@ -124,14 +124,17 @@ CONFIG_GPIO=y
 CONFIG_DK_LIBRARY=y
 ```
 
+This snippet will enable the GPIOs and include the DK library. The way this is done in NCS/Zephyr is a bit complex. If you are interrested in how this works, you can look into the CMakeLists.txt file found in NCS\nrf\lib\CMakeLists.txt, and see how it includes stuff based on the configurations. For now we will accept that this is just how it works.
+After adding the configurations in prj.conf your project should compile, and something should be printed in the log whenever you press or release a button. Remember to call `configure_dk_buttons_leds()` in your main() function. 
+
+<br>
+
 Let us add a specific LED and a blinking interval near the top of main.c
 ```C
 #define RUN_STATUS_LED DK_LED1
 #define RUN_LED_BLINK_INTERVAL 1000
 ```
 
-This snippet will enable the GPIOs and include the DK library. The way this is done in NCS/Zephyr is a bit complex. If you are interrested in how this works, you can look into the CMakeLists.txt file found in NCS\nrf\lib\CMakeLists.txt, and see how it includes stuff based on the configurations. For now we will accept that this is just how it works.
-After adding the configurations in prj.conf your project should compile, and something should be printed in the log whenever you press or release a button. Remember to call `configure_dk_buttons_leds()` in your main() function.
 
 
 Open `dk_buttons_and_leds.h` to see if there is any ways you can turn on and off this LED from your main function. Our goal is to toggle the LED in a `for(;;)` loop (equivalent to a while(true) loop). There are several ways to do this. Try to find one that works. </br>
