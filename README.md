@@ -556,7 +556,7 @@ Now your device should advertise if you flash it with the latest build. Open nRF
 
 <br>
 
-Note that all the screenshots are using nRF Connect for Desktop. This would require an additional DK, so use the app nRF Connect for Android/iOS. You will find it on App Store/Google Play. 
+Note that all the screenshots are using nRF Connect for Desktop. This would require an additional DK, so use the mobile app nRF Connect for Android/iOS. You will find it on App Store/Google Play. 
 
 </br>
 
