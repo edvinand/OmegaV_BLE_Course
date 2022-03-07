@@ -29,7 +29,7 @@ static nrf_pwm_sequence_t position_2_sequence = {
 };
 
 
-void set_gpio_voltage(void)
+void set_gpio_voltage(void) // If your motor is struggling, try calling this function from motor_init().
 {
     uint32_t regout = NRF_UICR->REGOUT0;
     uint32_t target_voltage = UICR_REGOUT0_VOUT_3V3;
@@ -84,10 +84,6 @@ int motor_init(void)
 
 void set_motor_angle(uint16_t angle)
 {
-    if ((angle < 0) || (angle > 180)) {
-        LOG_INF("invalid angle, %d", angle);
-        return;
-    }
 
     LOG_INF("setting angle %d", angle);
     if (angle == 1) {
@@ -96,22 +92,5 @@ void set_motor_angle(uint16_t angle)
     else if (angle == 2) {
         nrfx_pwm_simple_playback(&pwm, &position_2_sequence, 100, NRFX_PWM_FLAG_STOP);
     }
-    /*uint16_t temp = 18000 + angle*1000/180;
-    LOG_INF("pwm_signal %d", temp);
-
-
-    nrf_pwm_values_individual_t in_between_PWM[] = {
-        {temp},
-    };
-    nrf_pwm_sequence_t in_between_sequence = {
-        .values.p_individual    = in_between_PWM,
-        .length                 = NRF_PWM_VALUES_LENGTH(in_between_PWM),
-        .repeats                = 0,
-        .end_delay              = 500
-    };
-
-    //in_between_sequence.values.p_individual->channel_0 = temp;
-    nrfx_pwm_simple_playback(&pwm, &in_between_sequence, 50, NRFX_PWM_FLAG_STOP);
-    k_sleep (K_MSEC(1000));*/
 
 }
