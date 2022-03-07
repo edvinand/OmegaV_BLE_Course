@@ -16,11 +16,6 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #define RUN_STATUS_LED DK_LED1
 #define RUN_LED_BLINK_INTERVAL 1000
 
-volatile uint16_t angle = 0;
-
-
-//#define PWM_DEFAULT_CONFIG_IRQ_PRIORITY     6
-
 /* Callbacks */
 void button_handler(uint32_t button_state, uint32_t has_changed)
 {
@@ -50,12 +45,8 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
         switch(button_pressed)
         {
             case 1:
-                angle += 10;
-                set_motor_angle(angle);
                 break;
             case 2:
-                angle -= 10;
-                set_motor_angle(angle);
                 break;
             case 3:
                 set_motor_angle(1);
