@@ -387,11 +387,21 @@ This will cause the motor to go to "position 1", and stay there for 50 PWM perio
 <br>
 Use what you now know to make two of the buttons in the button handler from main.c control the motor between "position_1" and "position_2"
 
+<br>
+
+*Hint: If you are stuck, you can see a suggested solution for main.c, and motor_control.c/h here:
+
+<br>
+
+[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot0/main.c)</br>
+[motor_control.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/motor_control.c)</br>
+[motor_control.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/motor_control.h)</br>
+
 ### Step 4 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
 </br>
 </br>
-Because we want to keep our main.c clean, we will try to do most of the bluetooth configuration and handling in another file, just like we did with PWM. Therefore we will start by adding some more custom files. Inside the `remote_service` folder, create two more files: `remote.h` and `remote.c`. To include these custom files to your project, open CMakeLists.txt, add on to what we changed earlier:
+Because we want to keep our main.c clean, we will try to do most of the bluetooth configuration and handling in another file, just like we did with PWM. Therefore we will start by adding some more custom files. Inside the `custom_files` folder, create two more files: `remote.h` and `remote.c`. To include these custom files to your project, open CMakeLists.txt, add on to what we changed earlier:
 
 ```C
 # Custom files and folders
@@ -573,8 +583,8 @@ struct bt_conn_cb bluetooth_callbacks = {
 If you followed the guide this far, your files should look something like this. You can use this in case you got stuck somewhere. Please note that I also added some new code to the connected and disconnected events in main.c, and a current_conn parameter to keep track of the current connection. 
 </br>
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/main.c)</br>
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/remote_service/remote.c)</br>
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/remote_service/remote.h)</br>
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.c)</br>
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.h)</br>
 
 
 ### Step 5 - Adding our First Bluetooth Service
@@ -646,8 +656,8 @@ ssize_t bt_gatt_attr_read(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 </br>
 *Hint: If you are stuck, I uploaded another snapshot of the project here: 
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/main.c), 
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/remote_service/remote.c), 
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/remote_service/remote.h).*
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.c), 
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.h).*
 </br>
 </br>
 Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the refresh button in nRF Connect. Whenever you push a button on your DK and read it again, you should see that the is updated.
@@ -804,8 +814,8 @@ Now try to call this function from the button handler, check the return value an
 </br>
 *In case you got stuck anywhere since the last snapshot, I'll upload a 3rd snapshot here:</br>
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/main.c)</br>
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.c)</br>
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/remote_service/remote.h)*
+[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/custom_files/remote.c)</br>
+[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/custom_files/remote.h)*
 
 ### Step 7 - Writing Bck to our Peripheral
 So now we can send notifications from our peripheral to our central. For a remote controller what more can you ask for? Well, let us say we want some sort of two way communication, where we want the central to be able to send messages back to the remote. Perhaps to read it out loud, toggle an LED when the TV is about to go to sleep, or perhaps you do not intend to develop a remote controller at all. We could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
