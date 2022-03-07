@@ -539,6 +539,10 @@ static const struct bt_data sd[] = {
 
 So we use the CONFIG_BT_DEVICE_NAME from our prj.conf file as our device name, and we apply this name in our advertising packet `ad[]`. In our Scan response packet, `sd[]` we add our randomly generated UUID. Now that we have the data we want to advertise, we can start the advertising from bluetooth_init(), after the bt_init_ok semaphore has been taken.
 
+<br>
+
+**This is a good time to change the `CONFIG_BT_DEVICE_NAME` in your prj.conf file to something unique, to distinguish your device from your neighbour's device.**
+
 ```C
 /* This snippet belongs in bluetooth_init() in remote.c */
     err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
@@ -549,6 +553,11 @@ So we use the CONFIG_BT_DEVICE_NAME from our prj.conf file as our device name, a
 ```
 
 Now your device should advertise if you flash it with the latest build. Open nRF Connect for Desktop/iOS/Android and start scanning for the device. If there are many BLE devices nearby, try to sort by RSSI (Received Signal Strength Indicator), or ad a filter to the advertising name:
+
+<br>
+
+Note that all the screenshots are using nRF Connect for Desktop. This would require an additional DK, so use the app nRF Connect for Android/iOS. You will find it on App Store/Google Play. 
+
 </br>
 
 Scan uisng nRF Connect for Desktop | 
