@@ -721,13 +721,7 @@ static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct 
 *Hint: If you are stuck, I uploaded another snapshot of the project here:*
 
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/main.c), 
-
-<br>
-
 [remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.c), 
-
-<br>
-
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.h).
 
 </br>
