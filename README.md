@@ -581,9 +581,6 @@ You should see that you can actually connect to your device as well, since we cl
 We want to receive these events in our main.c file, so that we can keep track of the state of our device. Let us start by adding a struct containing the callbacks in main.c:
 </br>
 
- | 
------------- |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG"> |
 
 ```C
 struct bt_conn_cb bluetooth_callbacks = {
