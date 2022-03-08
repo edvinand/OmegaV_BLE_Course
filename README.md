@@ -979,7 +979,6 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
 }
 ```
 What we are doing here is first that we copy the content of the data pointer to a temporary string. This is not strictly necessary, but in this case we want to print the data to the log, and one way to do that is to use the log_strdup() which is looking for a zero-terminated string. To avoid writing to the actual data buffer (which is a very bad idea) we copy the content and add a 0x00 byte at the end.
-
 Then we print who sent the data, the length of the data, and the actual message. 
 
 <br>
