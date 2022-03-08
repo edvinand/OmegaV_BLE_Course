@@ -988,7 +988,7 @@ Then we print who sent the data, the length of the data, and the actual message.
 
 Try to write to your new characteristic. Note that when you press the write button (button with upwards pointing arrow), you need to select whether you want to write raw bytes using "ByteArray", or if you want to send a string of data using "UTF8". You can also use Bool or UnsignedInt, but that is not something we need to use. 
 
-Writing to a Characteristic in nRF Connect for Desktop | 
+Writing to a Characteristic | 
 ------------ |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/write_to_characteristic.jpg" width="300"> |
 
