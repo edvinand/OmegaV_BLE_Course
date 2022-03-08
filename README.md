@@ -986,6 +986,14 @@ Then we print who sent the data, the length of the data, and the actual message.
 
 <br>
 
+Try to write to your new characteristic. Note that when you press the write button (button with upwards pointing arrow), you need to select whether you want to write raw bytes using "ByteArray", or if you want to send a string of data using "UTF8". You can also use Bool or UnsignedInt, but that is not something we need to use. 
+
+Writing to a Characteristic in nRF Connect for Desktop | 
+------------ |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/write_to_characteristic.png" width="300"> |
+
+<br>
+
 But we said that we wanted to control our motors using these messages. Try to check the incoming data, and use this to control the motor. To check the first byte of the data, you can use `data[0]`. Try to set the motor in different positions depending on the first byte of the message.
 
 
@@ -993,22 +1001,5 @@ But we said that we wanted to control our motors using these messages. Try to ch
 
 *Hint: Perhaps just check whether the first byte is 0x00 or 0x01, and set the motor to one of two predefined angles.*
 
-
-
-If you are using nRF Connect for Desktop, unfortunately you can't write textstrings like you can in nRF Connect for Android or iOS. Let us try to write the hexadecimal values for the string "123", which is 31 32 33 into nRF Connect for Desktop:
-
-Writing to a Characteristic in nRF Connect for Desktop | 
------------- |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/123.png"> |
-
-</br>
-And you should hopefully see it printed in the log of your peripheral. 
-</br>
-</br>
-
-You can find online string-to-hex generators online, such as [this one](https://string-functions.com/string-hex.aspx). Try pasting a text string, such as: </br>
-48 65 6C 6C 6F 77 6F 72 6C 64 21
-</br>
-</br>
 
 You can find the final version of the files in the NCS project [here](https://github.com/edvinand/OmegaV_BLE_Course/tree/main/remote_controller).

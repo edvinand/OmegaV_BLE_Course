@@ -1,4 +1,3 @@
-
 #include "remote.h"
 
 #define LOG_MODULE_NAME remote
@@ -6,16 +5,14 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 static K_SEM_DEFINE(bt_init_ok, 0, 1);
 static uint8_t button_value = 0;
+static struct bt_remote_service_cb remote_service_callbacks;
 
 #define DEVICE_NAME CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN (sizeof(DEVICE_NAME)-1)
 
-static struct bt_remote_service_cb remote_service_callbacks;
-
-
 static const struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-    BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN)
+    BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
 };
 
 static const struct bt_data sd[] = {
@@ -41,21 +38,28 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
                     NULL, on_write, NULL),
 );
 
-
 /* Callbacks */
-void bt_ready(int err)
+
+static ssize_t on_write(struct bt_conn *conn,
+              const struct bt_gatt_attr *attr,
+              const void *buf,
+              uint16_t len,
+              uint16_t offset, 
+              uint8_t flags)
 {
-    if (err) {
-        LOG_ERR("bt_ready returned %d", err);
+    LOG_INF("Received data, handle %d, conn %p",
+        attr->handle, (void *)conn);
+
+    if (remote_service_callbacks.data_received) {
+        remote_service_callbacks.data_received(conn, buf, len);
     }
-    k_sem_give(&bt_init_ok);
+    return len;
 }
 
-static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 void *buf, uint16_t len, uint16_t offset)
+void on_sent(struct bt_conn *conn, void *user_data)
 {
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, &button_value,
-				 sizeof(button_value));
+    ARG_UNUSED(user_data);
+    LOG_INF("Notification sent on connection %p", (void *)conn);
 }
 
 void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
@@ -67,29 +71,23 @@ void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value
     }
 }
 
-void on_sent(struct bt_conn *conn, void *user_data)
+static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 void *buf, uint16_t len, uint16_t offset)
 {
-    ARG_UNUSED(user_data);
-    LOG_INF("Notification sent on connection %p", (void *)conn);
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, &button_value,
+				 sizeof(button_value));
 }
 
-static ssize_t on_write(struct bt_conn *conn,
-                        const struct bt_gatt_attr *attr,
-                        const void *buf,
-                        uint16_t len,
-                        uint16_t offset,
-                        uint8_t flags)
+void bluetooth_ready_callback(int err)
 {
-    LOG_INF("Received data, handle %d, conn %p",
-        attr->handle, (void *)conn);
-
-    if (remote_service_callbacks.data_received) {
-        remote_service_callbacks.data_received(conn, buf, len);
+    if (err)
+    {
+        LOG_INF("bluetooth_ready_callback err %d", err);
     }
-    return len;
+    k_sem_give(&bt_init_ok);
 }
 
-/* Remote controller functions */
+/* Remote service functions */
 
 int send_button_notification(struct bt_conn *conn, uint8_t value)
 {
@@ -108,34 +106,35 @@ int send_button_notification(struct bt_conn *conn, uint8_t value)
     return err;
 }
 
-void set_button_value(uint8_t btn_value)
+void set_button_press(uint8_t btn_value)
 {
     button_value = btn_value;
 }
 
-int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote_cb)
+int bluetooth_init(struct bt_conn_cb * bt_cb, struct bt_remote_service_cb * remote_cb)
 {
-    int err;
+    int err = 0;
     LOG_INF("Initializing Bluetooth");
 
-    if (bt_cb == NULL || remote_cb == NULL) {
+    if (bt_cb == NULL || remote_cb == NULL){
         return NRFX_ERROR_NULL;
     }
-    bt_conn_cb_register(bt_cb);
-    remote_service_callbacks.notif_changed = remote_cb->notif_changed;
-    remote_service_callbacks.data_received = remote_cb->data_received;
-
-    err = bt_enable(bt_ready);
+    {
+        bt_conn_cb_register(bt_cb);
+        remote_service_callbacks.notif_changed = remote_cb->notif_changed;
+        remote_service_callbacks.data_received = remote_cb->data_received;
+    }
+    
+    err = bt_enable(bluetooth_ready_callback);
     if (err) {
-        LOG_ERR("bt_enable returned %d", err);
+        LOG_ERR("bt_enable() ret %d", err);
         return err;
     }
-
     k_sem_take(&bt_init_ok, K_FOREVER);
 
     err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
-    if (err){
-        LOG_ERR("couldn't start advertising (err = %d", err);
+    if (err) {
+        LOG_ERR("Couldn't start advertising. (err %d)", err);
         return err;
     }
 
