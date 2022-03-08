@@ -568,7 +568,7 @@ If you select this device, you should be able to see some information from the a
 
 Advertisement description | Listed UUIDs |
 ------------ | ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG" width="400"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG width="400""> |
 
 
 </br>
