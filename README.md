@@ -879,7 +879,7 @@ int send_button_notification(struct bt_conn *conn, uint8_t value)
 This one is a lot to take in, but let us see what is going on. In send_button_notification we take two input parameters. The pointer to the connection that we want to send the notification to, and the value of the characteristic, which is the actual payload data being transmitted. If you were to implement this from scratch, start by using the function bt_gatt_notify_cb() and look at what parameters it takes. The params parameter is the struct bt_gatt_notify_params. It holds a lot, but we only populate what we need in our case. We need the attribute, which points to the characteristic where we are actually sending the notification, and we need the value, the length of the value, and a callback function. This callback may be very useful in some cases where you are sending a lot of data, to keep track on when the data is sent. We will just use it to print that we have successfully sent a notification.
 </br>
 </br>
-Now try to call this function from the button handler, check the return value and see if you can send a notification from your peripheral to the connected central.
+Now try to call this function from the button handler, check the return value and see if you can send a notification from your peripheral to the connected central. Remember to enable notifications on the characteristic from your phone by pressing the button with the three arrows pointing down.
 </br>
 </br>
 *In case you got stuck anywhere since the last snapshot, I'll upload a 3rd snapshot here:</br>
