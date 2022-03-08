@@ -556,27 +556,34 @@ Now your device should advertise if you flash it with the latest build. Open nRF
 
 <br>
 
-Note that all the screenshots are using nRF Connect for Desktop. This would require an additional DK, so use the mobile app nRF Connect for Android/iOS. You will find it on App Store/Google Play. 
+Note that all the screenshots are using nRF Connect for iOS. If you are using nRF Connect for Android, the app may look a bit different.
 
 </br>
 
-Scan uisng nRF Connect for Desktop | 
+Scan uisng nRF Connect for Mobile | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements_mobile.PNG"> |
 
-*Note: In your case it probably will not say "Remote Service" in the Services field, but rather the UUID that you generated. If you want to save this custom UUID in nRF Connect for Desktop, click the gear icon (settings) on the nrf5x device, and select "Open UUID definitions file". See if you can copy the template of one of the services, and insert your own UUID.*
+If you select this device, you should be able to see some information from the advertisements. The name should appear as we set it in our prj.conf, and the service should match the service UUID should be visible, and match the service UUID that we defined in remote.h.
 
-Open the UUID definitions file | 
------------- |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/open_uuid_definitions_file.png"> |
+Advertisement description | Listed UUIDs |
+------------ | ------------ |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG"> |
+
 
 </br>
 </br>
-You can actually connect to your device, since we claimed in the `BT_LE_ADV_CONN` that we are connectable. However, if you try to connect to it, you will see that other than the Generic Attribute and the Generic Access services, we don't actually have the custom service that we claimed to have in the advertising packet. We will fix that later, but first, let us try to inform our application that something actually connected to us.
+You should see that you can actually connect to your device as well, since we claimed in the `BT_LE_ADV_CONN` (from bt_le_adv_start()) that we are connectable. However, if you try to connect to it, you will see that other than the Generic Attribute and the Generic Access services, we don't actually have the custom service that we claimed to have in the our advertising packet (Listed as "Advertised Services"). We will fix that later, but first, let us try to inform our application that something actually connected to us.
 </br>
+
+
 </br>
 We want to receive these events in our main.c file, so that we can keep track of the state of our device. Let us start by adding a struct containing the callbacks in main.c:
 </br>
+
+ | 
+------------ |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG"> |
 
 ```C
 struct bt_conn_cb bluetooth_callbacks = {
