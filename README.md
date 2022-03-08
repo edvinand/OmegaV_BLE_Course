@@ -716,10 +716,14 @@ static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct 
 
 <br>
 </br>
+
+
 *Hint: If you are stuck, I uploaded another snapshot of the project here: 
+
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/main.c), 
 [remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.c), 
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.h).*
+
 </br>
 </br>
 Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the refresh button in nRF Connect. Whenever you push a button on your DK and read it again, you should see that the is updated.
