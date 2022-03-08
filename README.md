@@ -728,11 +728,11 @@ static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct 
 
 </br>
 </br>
-Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the refresh button in nRF Connect. Whenever you push a button on your DK and read it again, you should see that the is updated.
+Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the read button in nRF Connect (the button with the down pointing arrow). Whenever you push a button on your DK and read it again, you should see that the is updated.
 
 
 ### Step 6 - Characteristic Notifications
-When we are working on low energy devices, and a remote controller, it is not very efficient nor user friendly to have to ask the remote what the status of the last pressed button is. It would be a tradeoff between a long latency and a high current consumption. Therefore we have something called "notifications", which allows the peripheral to push changes to the central whenever they occur. This is set using something called Client Characteristic Configuration Descriptor (CCCD or CCC). The first thing we need to do is to add this descriptor to our characteristic. Do this by adding the last line to your Service macro in remote.c:
+We do not want to keep having to ask our peripheral about the last pressed button all the time. It requires a lot of read requests and read response packets on the air, which is not very power efficient. Therefore we have something called "notifications", which allows the peripheral to push changes to the central whenever they occur. This is set using something called Client Characteristic Configuration Descriptor (CCCD or CCC). The first thing we need to do is to add this descriptor to our characteristic. Do this by adding the last line to your Service macro in remote.c:
 
 ```C
 /* This code snippet belongs to remote.c */
@@ -745,6 +745,8 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
     BT_GATT_CCC(button_chrc_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 );
 ```
+
+**Note that we added ` |BT_GATT_CHRC_NOTIFY` on the line that previously just said `BT_GATT_CHRC_READ`.**
 
 The first parameter is a callback that is triggered whenever someone writes to the CCC. The last parameter is the read/write permissions. Here we allow the central to both read and write to this configuration. This means that it can check whether or not notifications are enabled, and enable/disable it. Please note that we also added the BT_GATT_CHRC_NOTIFY in our properties for the characteristic itself, as we are now adding the possiblilty to enable notifications.
 
