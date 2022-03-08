@@ -589,8 +589,40 @@ struct bt_conn_cb bluetooth_callbacks = {
 };
 ```
 
+Try "control clicking" bt_conn_cb, to see what callback types the .connected and .disconnected callback events are to understand why they have the function parameters that they have. We will use these functions to print to our log that we are connected, and to set a connection pointer that we use to keep track of whether or not we are in a connection.
+
+```C
+/* Near top of main.c */
+static struct bt_conn *current_conn;    // Used to keep track of current connection status.
+
+/* Callbacks, also in main.c: */
+
+void on_connected(struct bt_conn *conn, uint8_t err)
+{
+    if (err) {
+        LOG_ERR("connection failed, err %d", err);
+    }
+    current_conn = bt_conn_ref(conn);
+    dk_set_led_on(CONN_STATUS_LED);
+}
+
+void on_disconnected(struct bt_conn *conn, uint8_t reason)
+{
+	LOG_INF("Disconnected (reason: %d)", reason);
+	dk_set_led_off(CONN_STATUS_LED);
+	if(current_conn) {
+		bt_conn_unref(current_conn);
+		current_conn = NULL;
+	}
+}
+```
+
+Although it may not be completely clear, what you need to know here is that we fetch a connection reference from the connection event. We will use this later. When we disconnect we remove this reference, and set the current_conn parameter back to a NULL-pointer.
+
+
 **Challenge:** </br>
-***Implement these callbacks by looking at the bt_conn_cb struct definition (ctrl click it). For now, you can just print something using `LOG_INF()` in the events. Then try to pass the bluetooth_callbacks on into `bluetooth_init()`, and register the callbacks using `bt_conn_cb_register()` before the call to `bt_enable()`. If you are stuck, you can find a solution below.***
+***Forward these callbacks (the bluetooth_callbacks parameter) to bluetooth init, and use bt_conn_cb_register() to register them to our Bluetooth stack. Do so before you call bt_enable(). In order to forward the bluetooth_callbacks I suggest that you make the bluetooth_init() function take them in as a pointer. If you are stuck, you will find a solution below.***
+
 </br>
 </br>
 If you followed the guide this far, your files should look something like this. You can use this in case you got stuck somewhere. Please note that I also added some new code to the connected and disconnected events in main.c, and a current_conn parameter to keep track of the current connection. 
