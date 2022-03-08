@@ -349,10 +349,10 @@ How to set this frequency is not trivial, since the second parameter is a double
 The nrfx_pwm_simple_playback() expects a pointer to a nrf_pwm_sequence_t parameter. It also holds a parameter indicating the length of this array. This is all we will use, and we will set the rest to 0. The array with the PWM values is a parameter with the type nrf_pwm_sequence_t, so let us start by implementing this near the top of motor_control.c:
 
 ```C
-static  nrf_pwm_values_inidividual_t position_1[] = {
+static  nrf_pwm_values_individual_t position_1[] = {
     {19000},
 };
-static  nrf_pwm_values_inidividual_t position_1[] = {
+static  nrf_pwm_values_individual_t position_2[] = {
     {18000},
 };
 ```
@@ -979,7 +979,6 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
 }
 ```
 What we are doing here is first that we copy the content of the data pointer to a temporary string. This is not strictly necessary, but in this case we want to print the data to the log, and one way to do that is to use the log_strdup() which is looking for a zero-terminated string. To avoid writing to the actual data buffer (which is a very bad idea) we copy the content and add a 0x00 byte at the end.
-
 Then we print who sent the data, the length of the data, and the actual message. 
 
 <br>
