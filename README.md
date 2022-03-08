@@ -990,7 +990,7 @@ Try to write to your new characteristic. Note that when you press the write butt
 
 Writing to a Characteristic in nRF Connect for Desktop | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/write_to_characteristic.png" width="300"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/write_to_characteristic.jpg" width="300"> |
 
 <br>
 
