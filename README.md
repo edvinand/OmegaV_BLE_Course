@@ -888,7 +888,7 @@ Now try to call this function from the button handler, check the return value an
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/custom_files/remote.h)*
 
 ### Step 7 - Writing Bck to our Peripheral
-So now we can send notifications from our peripheral to our central. For a remote controller what more can you ask for? Well, let us say we want some sort of two way communication, where we want the central to be able to send messages back to the remote. Perhaps to read it out loud, toggle an LED when the TV is about to go to sleep, or perhaps you do not intend to develop a remote controller at all. We could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
+So now we can send button presses from our remote to our phone. Pretty cool. But since we have a wireless device connected to our phone, and this device has a motor connected to it, it would be nice to be able to control the motor from the phone, right? For this we could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
 
 **Todo:**</br>
 ***Add a third UUID where you increment the byte that we did for the previous UUID once more. Call the UUID BT_UUID_REMOTE_MESSAGE_CHRC_VAL and call the characteristic handle BT_UUID_REMOTE_MESSAGE_CHRC***
@@ -911,10 +911,10 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
 );
 ```
 
-We have seen this before. We are adding a characteristic to our old service, we claim that the central can write to it, and we give the central the permission to write to it. We don't need a read callback, but we add the `on_write` callback. We do not care about the start value of the characteristic as well, since it is not possible for the central to read it.
+We have seen this before. We are adding a characteristic to our old service, we claim that the central can write to it, and we give the central the permission to write to it. We don't need a read callback, but we add the `on_write` callback. We do not care about the start value of the characteristic as it is not possible for the central to read it.
 </br>
 </br>
-What remains is to implement our on_write callback. This is a typical callback you would want to propagate to main.c, as in a commercial product, you may want to control some other peripherals depending on the content of the message from the central. Luckily we already have a way of forwarding events from remote.c to our main.c file. Let us add another event callback in our bt_remote_service_cb struct in remote.h:
+What remains is to implement our on_write callback. This is a typical callback you would want to propagate to main.c, as in a commercial product, we want to control some other peripherals (PWM) depending on the content of the message from the central. Luckily we already have a way of forwarding events from remote.c to our main.c file. Let us add another event callback in our bt_remote_service_cb struct in remote.h:
 
 ```C
 /* This code snippet belongs to remote.h */
@@ -979,8 +979,21 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
 }
 ```
 What we are doing here is first that we copy the content of the data pointer to a temporary string. This is not strictly necessary, but in this case we want to print the data to the log, and one way to do that is to use the log_strdup() which is looking for a zero-terminated string. To avoid writing to the actual data buffer (which is a very bad idea) we copy the content and add a 0x00 byte at the end.
+
 </br>
+
 Then we print who sent the data, the length of the data, and the actual message. 
+
+<br>
+
+But we said that we wanted to control our motors using these messages. Try to check the incoming data, and use this to control the motor. To check the first byte of the data, you can use `data[0]`. Try to set the motor in different positions depending on the first byte of the message.
+
+
+<br>
+
+*Hint: Perhaps just check whether the first byte is 0x00 or 0x01, and set the motor to one of two predefined angles.*
+
+
 
 If you are using nRF Connect for Desktop, unfortunately you can't write textstrings like you can in nRF Connect for Android or iOS. Let us try to write the hexadecimal values for the string "123", which is 31 32 33 into nRF Connect for Desktop:
 
