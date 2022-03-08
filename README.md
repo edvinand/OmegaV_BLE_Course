@@ -625,8 +625,11 @@ Although it may not be completely clear, what you need to know here is that we f
 
 </br>
 </br>
+
 If you followed the guide this far, your files should look something like this. You can use this in case you got stuck somewhere. Please note that I also added some new code to the connected and disconnected events in main.c, and a current_conn parameter to keep track of the current connection. 
+
 </br>
+
 [main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/main.c)</br>
 [remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.c)</br>
 [remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.h)</br>
