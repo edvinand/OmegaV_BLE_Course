@@ -562,13 +562,13 @@ Note that all the screenshots are using nRF Connect for iOS. If you are using nR
 
 Scan uisng nRF Connect for Mobile | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements_mobile.PNG" width="400"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements_mobile.PNG" width="300"> |
 
 If you select this device, you should be able to see some information from the advertisements. The name should appear as we set it in our prj.conf, and the service should match the service UUID should be visible, and match the service UUID that we defined in remote.h.
 
 Advertisement description | Listed UUIDs |
 ------------ | ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG" width="400"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG width="400""> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG" width="300"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG" width="300"> |
 
 
 </br>
