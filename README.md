@@ -803,7 +803,7 @@ struct bt_remote_service_cb remote_callbacks = {
 
 Then we need to forward this remote_callbacks struct into bluetooth_init similar to the way we did with the bluetooth_callbacks struct.
 
-Then inside bluetooth_callbacks() in remote.c we will first check that they are not NULL pointers, and then populate them manually:
+Then inside bluetooth_init() in remote.c we will first check that they are not NULL pointers, and then populate them manually:
 
 ```C
 /* This code snippet belongs to remote.c */
