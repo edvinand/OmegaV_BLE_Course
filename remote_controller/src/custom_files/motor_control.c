@@ -29,37 +29,37 @@ static nrf_pwm_sequence_t position_2_sequence = {
 };
 
 
-void set_gpio_voltage(void) // If your motor is struggling, try calling this function from motor_init().
-{
-    uint32_t regout = NRF_UICR->REGOUT0;
-    uint32_t target_voltage = UICR_REGOUT0_VOUT_3V3;
-
-    LOG_INF("Regout: 0x%08x", regout);
-    if ((regout & UICR_REGOUT0_VOUT_Msk) != target_voltage) {
-        LOG_INF("regout not set to 3V3. Configuring...");
-        
-
-        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen;
-        while (NRF_NVMC->CONFIG != NVMC_CONFIG_WEN_Wen){
-            // Wait...
-        }
-        NRF_UICR->REGOUT0 = (target_voltage | ~UICR_REGOUT0_VOUT_Msk);
-        while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {
-            // Wait...
-        }
-        while ((NRF_UICR->REGOUT0 & UICR_REGOUT0_VOUT_Msk) != target_voltage) {
-            // Wait...
-        }
-        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren;
-        while (NRF_NVMC->CONFIG != NVMC_CONFIG_WEN_Ren){
-            // Wait...
-        }
-        NVIC_SystemReset();
-    } else {
-        LOG_INF("Regout0 is set to target voltage.");
-    }
-
-}
+//void set_gpio_voltage(void) // If your motor is struggling, try calling this function from motor_init().
+//{
+//    uint32_t regout = NRF_UICR->REGOUT0;
+//    uint32_t target_voltage = UICR_REGOUT0_VOUT_3V3;
+//
+//    LOG_INF("Regout: 0x%08x", regout);
+//    if ((regout & UICR_REGOUT0_VOUT_Msk) != target_voltage) {
+//        LOG_INF("regout not set to 3V3. Configuring...");
+//        
+//
+//        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen;
+//        while (NRF_NVMC->CONFIG != NVMC_CONFIG_WEN_Wen){
+//            // Wait...
+//        }
+//        NRF_UICR->REGOUT0 = (target_voltage | ~UICR_REGOUT0_VOUT_Msk);
+//        while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {
+//            // Wait...
+//        }
+//        while ((NRF_UICR->REGOUT0 & UICR_REGOUT0_VOUT_Msk) != target_voltage) {
+//            // Wait...
+//        }
+//        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren;
+//        while (NRF_NVMC->CONFIG != NVMC_CONFIG_WEN_Ren){
+//            // Wait...
+//        }
+//        NVIC_SystemReset();
+//    } else {
+//        LOG_INF("Regout0 is set to target voltage.");
+//    }
+//
+//}
 
 int motor_init(void)
 {
