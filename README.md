@@ -2,7 +2,7 @@
 
 # Bluetooth_Low_Energy_Introduction
 
-**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (1.9.0 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
+**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (1.9.1 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
 Start by adding the "hello_world" sample from *NCS\zephyr\samples\hello_world* as an application in nRF Connect for Visual Studio Code. </br></br>
 
 # HW requirements
@@ -18,7 +18,7 @@ As mentioned in the prerequisites, you'll need:
 
 </br>
 
-This tutorial will show you how to create a custom service with two custom value characteristics. One which the central can read and subscribe to (notifications) and one that the central can write to. We will be using the nRF Connect SDK (v1.9.0 or later). This tutorial can be seen as a practical implementations of the guides:
+This tutorial will show you how to create a custom service with two custom value characteristics. One which the central can read and subscribe to (notifications) and one that the central can write to. We will be using the nRF Connect SDK (v1.9.1 or later). This tutorial can be seen as a practical implementations of the guides:
 - [Bluetooth low energy Advertising, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-advertising-a-beginners-tutorial)
 - [Bluetooth low energy Services, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-services-a-beginners-tutorial)
 - [Bluetooth low energy Characteristics, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-characteristics-a-beginners-tutorial)
