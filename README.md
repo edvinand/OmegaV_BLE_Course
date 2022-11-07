@@ -63,7 +63,7 @@ The only thing you need to do here is to set the board that you are using. Depen
 
 Build Configuration - Settings | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/build_configuration_settings.PNG"> |
+<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/build_configuration_settings2.PNG"> |
 
 </br>
 
