@@ -61,7 +61,7 @@ The only thing you need to do here is to set the board that you are using. Depen
 
 </br>
 
-Setup Application from Sample | 
+Build Configuration - Settings | 
 ------------ |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/build_configuration_settings.PNG"> |
 
