@@ -1,8 +1,8 @@
-# OmegaV_BLE_Course
+# Orbit Course
 
 # Bluetooth_Low_Energy_Introduction
 
-**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (1.9.1 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
+**Prerequisites:** Download Visual Studio Code, and nRF Connect for Desktop -> Toolchain manager and install the latest version of nRF Connect SDK (2.1.1 when this guide was written). Install nRF Connect for Visual studio (instructions from Toolchain Manager).
 Start by adding the "hello_world" sample from *NCS\zephyr\samples\hello_world* as an application in nRF Connect for Visual Studio Code. </br></br>
 
 # HW requirements
@@ -25,17 +25,19 @@ This tutorial will show you how to create a custom service with two custom value
 </br>
 
 Although these tutorials were written a while ago, when the nRF5 SDK was still the main SDK for nRF devices, the theory is the same, but in this guide we will be using the nRF Connect SDK, and the Softdevice Controller instead of the nRF5 SDK and the Softdevice.</br>
-If you are looking for the nRF5 SDK version of this guide, please see [this repository](https://github.com/edvinand/custom_ble_service_example).
+#If you are looking for the nRF5 SDK version of this guide, please see [this repository](https://github.com/edvinand/custom_ble_service_example).
 </br>
 The aim of this tutorial is to simply create one service with two characteristics without too much theory in between the steps. You don't need to download any .c or .h files, as we will start with the hello_world sample as a template.
 
 # Tutorial Steps
 ### Step 1 - Getting started
 
+**Note:** Most of the screenshots will say that we are using NCS v1.9.0. You should use the latest stable release, which is currently v2.1.1.
+
 If you haven't done it already, start by setting up nRF Connect for Visual Studio code by setting the environment parameters. Under the nRF Connect tab in Visual Studio Code (VSC) click "Open welcome page" and click "Quick Setup". 
 Visual Studio Code settings | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/welcome_page.PNG" width="1000"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/welcome_page.PNG" width="1000"> |
 
 These are my settings, but the path may vary in your environment.
 </br>
@@ -45,7 +47,7 @@ Start by selecting *Create a new application from sample* in the *nRF Connect* -
 
 Setup Application from Sample | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_from_sample.PNG"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/application_from_sample.PNG"> |
 
 </br>
 
@@ -64,7 +66,7 @@ If everything goes well, you should have flashed the *hello_world* sample to you
 
 Connect to board's UART | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/connect_uart.PNG"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/connect_uart.PNG"> |
 
 </br>
 
@@ -215,7 +217,7 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
 }
 
 /* Configurations */
-static void configure_dk_buttons_leds(void)
+static void configure_dk_buttons_and_leds(void)
 {
     int err;
     err = dk_leds_init();
@@ -234,7 +236,7 @@ void main(void)
     int blink_status = 0;
 	LOG_INF("Hello World! %s\n", CONFIG_BOARD);
 
-    configure_dk_buttons_leds();
+    configure_dk_buttons_and_leds();
 
     LOG_INF("Running...");
     for (;;) {
@@ -244,15 +246,22 @@ void main(void)
 }
 ```
 
-### Step 3 - Motor control
-Time to add some movement to our PWM motor. The motor that we used is the Tower Pro SG90. You can find a very simplified datasheet [here](http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf). For some background information on how PWM motors work, you can check out [this guide](https://www.jameco.com/Jameco/workshop/Howitworks/how-servo-motors-work.html).
-Basically, we want to output a PWM signal, and the duty cycle of the PWM signal determines what angle/position the rotor will maintain. In our case, the motor wants a duty cycle between 1 and 2 ms, and a PWM period of 20ms. 
-Because we want to keep main.c as clutter free as possible, we will try to do most of the PWM configurations and handling in another file, and implement some simple functions that we can call from main.c. Therefore we will start by adding a few custom files. Create a folder named `custom_files` inside your application folder: *remote_controller\src\custom_files*. You can either do this from Visual Studio Code or from your operating system. Inside this folder create two new files: `motor_control.h` and `motor_control.c`. To include these custom files to your project, open CMakeLists.txt, and add the following snippet at the end:
+### Step 3 - Sensor data
+Now we want to actually fetch some data from the real world. We will be using the MPU 6050 from InvenSense (we will call it the *MPU* from now on), which is a 6 axis accellerometer and gyroscope. You can read about it in the [datasheet from InvenSense](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf).
+
+</br>
+
+There are two main approaches to adapt the MPU into our application. Since NCS, which is built on top of Zephyr is an RTOS, it is possible to use the built in drivers for this particular sensor just by enabling some configurations in our prj.conf file. You can look into this later if you have the time, but for the purpose of learning, we will do this the "old fashion way".
+The MPU is using something called I2C (pronounced "I square C") to communicate with the nRF. This is a serial communication protocol where we can have one I2C master communicating with several I2C slaves only by connecting two wires, one for the clock and one for the data. In our case we will only use one SPI slave, but if you want to add more I2C devices at a later time, you can do so without using any additional GPIO pins.
+
+</br>
+
+Let us start by adding a couple of new files to our project to keep things clean. Create a folder called `custom_files` inside your application folder: *remote_controller\src\custom_files*. You can either do this from Visual Studio Code, or you can do it from your operating system (Windows File Explorer). Inside that folder, create two new files: `mpu_sensor.h` and `mpu_sensor.c`. To include these custom files to your project, open CMakeLists.txt, and add the following snippet at the end:
 ```C
 # Custom files and folders
 
 target_sources(app PRIVATE
-    src/custom_files/motor_control.c
+    src/custom_files/mpu_sensor.c
 )
 
 zephyr_library_include_directories(src/custom_files)
@@ -260,144 +269,839 @@ zephyr_library_include_directories(src/custom_files)
 
 Application Tree | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/application_tree.PNG"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/application_tree_0.PNG"> |
 
-If all goes well, the project should compile, and we should be able to see our motor_control.c in our application tree. Open `motor_control.c` and start by adding this line to the very top:
-
+If all goes well, the project should compile, and we should be able to see our `mpu_sensor.c` in our application tree. Open `mpu_sensor.c` by double clicking it, and start by adding this line to the very top:
 ```C
-#include "motor_control.h"
+#include "mpu_sensor.h"
 ```
 
-If you right click `"motor_control.h"` that you just wrote and click "Go to Definition" it should open the `motor_control.h` file in Visual Studio Code. In this header file, add:
+If you right click `mpu_sensor.h` that you just wrote and click "Go to Definition" it should open the `mpu_sensor.h` file in Visual Studio Code. In this header file, add:
 ```C
 #include <zephyr.h>
 #include <logging/log.h>
 ```
 
 **Challenge:** </br>
-Now, try to create a function called motor_init() in your motor_control.c file, that you also need to declare in `motor_control.h`. Make the function return 0, and check this return value in `main()`. Add whatever that is needed in these two files so that you can use this function to print *"Initializing Motor Control"* to our log. Remember to include `remote.h` from your main.c file.
+Now try to create a function called `mpu_sensor_init()` in your `mpu_sensor.c` file, that you also need to declare in `mpu_sensor.h`. Make the function return 0, and check this return value in `main()` from your `main.c` file. Add whatever is needed in these two files so that you can use this function to print *"Initializing MPU Sensor"* to our log. Remember to include `mpu_sensor.h` from your main.c file. 
 </br>
-*Hint 1: You shouldn't need to include any more files in motor_control.c.*
+*Hint 1: You shouldn't need to include any more files in `mpu_sensor.c`. Only in `mpu_sensor.h`. The files you need to include are also included in `main.c`.*
 </br>
-*Hint 2: Give motor_control.c another log module name, so that it is easy to see from the log what file that printed what lines.*
+*Hint 2: Give `mpu_sensor.c` another log module name, so that it is easy to see from what file the log messages are coming from.*
 </br>
+*Hint 3: using the `LOG_MODULE_NAME mpu` does not work. It is probably used by something else in Zephyr. Giving it the name `mpu_sensor` should work.*
+
+</br>
+</br>
+Congratulations. You have successfully written your first function in a different .c file. Now, let us start reading some sensor data. As I mentioned, the MPU6050 sensor uses I2C for communication. The first thing we want to do is to add I2C to our project. To do this, add the following snippet to your prj.conf file:
+
+```C
+# I2C
+CONFIG_NRFX_TWIM0=y
+```
+
+Note that TWI (Two Wire Interface) is another name for I2C. The reason for the two names has to do with trademarks and copyrights. Other than the name, they are identical.
+TWIM is short for "Two Wire Interface Master", which is what we want to use. Our sensor will be a Two Wire Interface Slave (TWIS), or an I2C slave. 
+</br>
+Unfortunately, adding this config alone is not enough. It tells the nrfx drivers what instance of I2C we want to use. We also need to tell our compiler to actually enable the I2C0 peripheral. The way we do this is by creating a file in our project folder (`remote_controller`). Call it `nrf52840dk_nrf52840.overlay`. It needs to have that exact name, because when a .overlay file with the board name that we are using, it will take that file, and overwrite the default settings that you are found in the board file. 
+</br>
+In your `nrf52840dk_nrf52840.overlay` file, add the following:
+```C
+&i2c0 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    clock-frequency = < I2C_BITRATE_STANDARD >;
+};
+```
+
+Then, inside your `mpu_sensor_init()`, we want to initialize our I2C/TWIM sensor. It requires a few steps. First, we need to start the I2C, and then we need to send some I2C commands to tell our sensor to turn on. Let us start by adding a function called `twi_init()`, and call it inside mpu_sensor_init().
+
+```C
+int mpu_sensor_init(void)
+{
+    int err;
+
+    LOG_INF("Initializing MPU Sensor");
+
+    err = twi_init();
+    if (err) {
+        return err; // I know that this seems unnecessary, since we return err right below. But we will add more in between later.
+    }
+    
+    return err;
+```
+
+Then, start by implementing your `twi_init()` function like this (write this *above* `mpu_sensor_init()` inside `mpu_sensor.c`. Since this will only be used from inside this file locally, we don't need to declare it in `mpu_sensor.h`.
+
+```C
+int twi_init(void)
+{
+    // Setup peripheral interrupt.
+    IRQ_CONNECT(DT_IRQN(DT_NODELABEL(i2c0)),DT_IRQ(DT_NODELABEL(i2c0), priority), nrfx_isr, nrfx_twim_0_irq_handler,0);
+    irq_enable(DT_IRQN(DT_NODELABEL(i2c0)));
+
+    int err = 0;
+    
+} 
+```
+
+What we are doing here is that we are telling the application that we want to connect the I2C0 interrupts to our nrfx_twim_0_irq_handler. This callback handler is implemented inside the nrfx i2c driver (found in nrfx_twim.c). We don't need to use this handler directly. We will set up our own handler shortly.
+Next, we need to configure our I2C to use the pins that we want to use, and the speed that we want to use, in addition to setting our own interrupt handler. Start by including "nrfx_twim.h" near the top of your mpu_sensor.h file.s
+If you open `nrfx_twim.c` (ctrl + P) and write nrfx_twim.c and hit enter), you should see a function called `nrfx_twim_init()`in there. We want to use this to initialize our TWI. If you look up the same function in nrfx_twim.h, you can see what input parameters it requires, with some description above.
+
+```C
+nrfx_err_t nrfx_twim_init(nrfx_twim_t const *        p_instance,
+                          nrfx_twim_config_t const * p_config,
+                          nrfx_twim_evt_handler_t    event_handler,
+                          void *                     p_context);
+```
+
+So we need to create most of these.
+`p_instance` is a pointer to the i2c0 instance, which we can create by adding this line close to the top of your `mpu_sensor.c`:
+
+```C
+const nrfx_twim_t m_twim_instance       = NRFX_TWIM_INSTANCE(0);
+```
+
+Then we need to create our config parameter. We can do it like this (inside our `twi_init()` function) :
+```C
+    const nrfx_twim_config_t twim_config = {                          \
+        .scl                = 4,                                      \ // These particular gpios are used because they are close to both VDD and GND.
+        .sda                = 3,                                      \ // These particular gpios are used because they are close to both VDD and GND.
+        .frequency          = NRF_TWIM_FREQ_400K,                     \
+        .interrupt_priority = NRFX_TWIM_DEFAULT_CONFIG_IRQ_PRIORITY,  \
+        .hold_bus_uninit    = false,                                  \
+    };
+```
+
+In addition we need an `nrfx_twim_evt_handler_t` type event handler. Look at the definition of `nrfx_twim_evt_handler_t` in nrfx_twim.h:
+
+```C
+/** @brief TWI event handler prototype. */
+typedef void (* nrfx_twim_evt_handler_t)(nrfx_twim_evt_t const * p_event,
+                                         void *                  p_context);
+```
+
+What this means is that the callback handler is expected to return nothing (void), and it has two parameters, p_event and p_contect. So create this function in your `mpu_sensor.c` :
+
+```C
+void my_twim_handler(nrfx_twim_evt_t const * p_event, void * p_context)
+{
+    LOG_INF("TWIM callback");
+}
+```
+
+The last parameter, p_context, we will just set to NULL.
+So try calling nrfx_twim_init() with the parameters that we just created as inputs. Remember that if it expects to be an input parameter to be a pointer, you probably need an `&` before you enter it. Also note that my_twim_handler will not have an `&` in front of it. Remember to check the return value from nrfx_twim_init(), and make sure it returns `NRFX_SUCCESS`.
+
+Lastly, after initializing our TWI, we need to enable it. Look for a function in `nrfx_twim.c`/`nrfx_twim.h` that we can use for this, and then call this after `nrfx_twim_init()`
+
+
+If you did succeeded with initializing and enabling your TWIM, your twi_init() function should look something like this:
+
+```C
+
+// Somewhere close to the top of mpu_sensor.c:
+const nrfx_twim_t m_twim_instance       = NRFX_TWIM_INSTANCE(0);
+[...]
+
+
+int twi_init(void)
+{
+    // Setup peripheral interrupt.
+    IRQ_CONNECT(DT_IRQN(DT_NODELABEL(i2c0)),DT_IRQ(DT_NODELABEL(i2c0), priority), nrfx_isr, nrfx_twim_0_irq_handler,0);
+    irq_enable(DT_IRQN(DT_NODELABEL(i2c0)));
+
+    int err = 0;
+
+    const nrfx_twim_config_t twim_config = {                          \
+        .scl                = 4,                                      \
+        .sda                = 3,                                      \
+        .frequency          = NRF_TWIM_FREQ_400K,                     \
+        .interrupt_priority = NRFX_TWIM_DEFAULT_CONFIG_IRQ_PRIORITY,  \
+        .hold_bus_uninit    = false,                                  \
+    };
+    err = nrfx_twim_init(&m_twim_instance,
+                          &twim_config,
+                          my_twim_handler,
+                          NULL);
+                          
+    if (err != NRFX_SUCCESS) {
+        LOG_ERR("twim_init failed. (err %x)", err);
+        return err;
+    }
+
+    nrfx_twim_enable(&m_twim_instance);
+    
+    return 0;
+}
+```
+
+Please note that NRFX_SUCCESS is not equal to 0, which is why we return 0 instead of err, after checking that it returned NRFX_SUCCESS.
+</br>
+</br>
+Now we have initialized and enabled our I2C, and we are ready to start communicating with our MPU. But before we do that, we need to know what data to send to our MPU, and how to interpret the data coming back. I2C slaves will always wait for a message from the I2C master, and then it will reply according to that message. 
+
+Now is the time to open up the datasheet to our sensor again. [(link)](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf)
+</br>
+To save some time, you can download this file, which I stole from a colleague, who found it somewhere (not sure of the source). 
+<br>
+[mpu6050_registers.h](https://github.com/edvinand/Orbit/blob/main/remote_controller/src/custom_files/mpu6050_registers.h)
+</br>
+If you cloned this repository, it is found under `remote_controller\src\custom_files\mpu6050_registers.h`, but if not, create a file with that name, and just copy paste the content into your newly created file. Include it from your mpu_senror.h file. 
+What this file contains is all the register names and addresses. We will use this when we communicate with our sensor. TWI drivers may seem a bit scary. Therefore, I will just dump a bunch of functions here that you can paste into your `mpu_sensor.c`, somewhere before `my_twim_handler()`. I will explain them briefly below.
+
+```C
+#define MPU_TWI_BUFFER_SIZE             14
+#define MPU_TWI_TIMEOUT                 10000
+#define MPU_ADDRESS                     0x68
+volatile static bool twi_xfer_done      = false;
+uint8_t twi_tx_buffer[MPU_TWI_BUFFER_SIZE];
+
+int app_mpu_tx(const nrfx_twim_t *  p_instance,
+                uint8_t             address,
+                uint8_t *           p_data,
+                uint8_t             length,
+                bool                no_stop)
+{
+    int err;
+
+    nrfx_twim_xfer_desc_t xfer = NRFX_TWIM_XFER_DESC_TX(address, p_data, length);
+    err = nrfx_twim_xfer(p_instance, &xfer, 0);
+    if (err != NRFX_SUCCESS) {
+        return err;
+    }
+
+    return 0;
+}
+
+int app_mpu_rx(const nrfx_twim_t *   p_instance,
+               uint8_t               address,
+               uint8_t *             p_data,
+               uint8_t               length)
+{
+    int err;
+    nrfx_twim_xfer_desc_t xfer = NRFX_TWIM_XFER_DESC_RX(address, p_data, length);
+
+    err = nrfx_twim_xfer(p_instance, &xfer, 0);
+    if (err != NRFX_SUCCESS) {
+        return err;
+    }
+    return 0;
+}
+
+int wait_for_xfer_done(void)
+{
+    int timeout = MPU_TWI_TIMEOUT;
+    while ((!twi_xfer_done) && --timeout)
+    {
+        // Wait...
+    }
+    if (timeout == 0) {
+        return NRFX_ERROR_TIMEOUT;
+    }
+    return 0;
+}
+
+int app_mpu_write_single_register(uint8_t reg, uint8_t data)
+{
+    int err;
+
+    uint8_t packet[2] = {reg, data};
+
+    twi_xfer_done = false;  // reset for new xfer
+    err = app_mpu_tx(&m_twim_instance, MPU_ADDRESS, packet, 2, false);
+    if (err) {
+        return err;
+    }
+    err = wait_for_xfer_done();
+    if (err == NRFX_ERROR_TIMEOUT) {
+        return err;
+    }
+    
+    return 0;
+}
+
+int app_mpu_write_registers(uint8_t reg, uint8_t * p_data, uint8_t length)
+{
+    int err;
+    
+    twi_tx_buffer[0] = reg;
+    memcpy((twi_tx_buffer + 1), p_data, length);
+
+    nrfx_twim_xfer_desc_t xfer = {0};
+    xfer.address = MPU_ADDRESS;
+    xfer.type = NRFX_TWIM_XFER_TX;
+    xfer.primary_length = length+1;
+    xfer.p_primary_buf = twi_tx_buffer;
+
+    twi_xfer_done = false;  // reset for new xfer
+    err = nrfx_twim_xfer(&m_twim_instance, &xfer,0);
+    if (err != NRFX_SUCCESS) {
+        return err;
+    }
+    err = wait_for_xfer_done();
+    if (err == NRFX_ERROR_TIMEOUT) {
+        return err;
+    }
+
+    return 0;
+    
+}
+
+int app_mpu_read_registers(uint8_t reg, uint8_t * p_data, uint8_t length)
+{
+    int err;
+
+    twi_xfer_done = false;  // reset for new xfer
+    err = app_mpu_tx(&m_twim_instance, MPU_ADDRESS, &reg, 1, false);
+    if (err) {
+        return err;
+    }
+    err = wait_for_xfer_done();
+    if (err == NRFX_ERROR_TIMEOUT) {
+        return err;
+    }
+
+    twi_xfer_done = false;  // reset for new xfer
+    err = app_mpu_rx(&m_twim_instance,MPU_ADDRESS, p_data, length);
+    if (err) {
+        LOG_ERR("app_mpu_rx returned %08x", err);
+        return err;
+    }
+    err = wait_for_xfer_done();
+    if (err == NRFX_ERROR_TIMEOUT) {
+        return err;
+    }
+
+    return 0;
+}
+```
+
+Explanation of functions:
+
+</br>
+**app_mpu_tx():** will send `length` bytes of data to the device with the `address`. The data it sends is stored in `p_data`.
+</br>
+**app_mpu_rx():** will read `length` bytes of data from the device with the `address`. The data is stored in `p_data`.
+</br>
+**wait_for_xfer_done():** will be used to wait for the next TWIM callback in our callback handler. We will implement this functionality in the TWI callback next. If it times out, the function will return NRFX_ERROR_TIMEOUT. If successful, it will return 0.
+</br>
+**app_mpu_write_single_register()** will send one byte of payload `data` to the register `reg` given as an input parameter.
+</br>
+**app_mpu_write_registers():** will send `length` bytes to the registers starting at `reg`. The data it sends is stored in `p_data`.
+</br>
+**app_mpu_read_registers():** will read `length` bytes starting from the register `reg`.
+</br>
+
+In addition, we added some parameters and definitions at the top:
+</br>
+**MPU_TWI_BUFFER_SIZE:** the maximum number of bytes we can use in a transfer. The size is selected so that it will be possible to read the accellerometer (6 bytes), gyroscope (6 bytes) and temperature (2 bytes) in one transmission.
+</br>
+**MPU_TWI_TIMEOUT:** the number of iterations we will wait for the TWI transfer to complete before we time out.
+</br>
+**MPU_ADDRESS:** This is the TWI address of our sensor. This will be used in all of our transfers. It is hardcoded into our read and write functions.
+</br>
+**twi_xfer_done:** The parameters used to tell `wait_for_xfer_done()` that we received our callback.
+</br>
+**twi_tx_buffer:** The actuall buffer (with size MPU_TWI_BUFFER_SIZE) that we use to read registers from the MPU.
+</br>
+
+Now there is only one thing we need to fix before we actually can start reading values from our accellerometer. We need to implement our TWI callback function. This is a function that is called every time a TWI transfer is done (either send or receive). We need to use it because these operations are not instant, and we actually need to use it to make our application wait for the previous transaction before we attempt to use it again, and because we want to make sure that the data was read successfully before we try to read from our TWI buffer.
+
+</br> 
+
+Have a peek at our `wait_for_xfer_done()` function. As you can see we are waiting for a parameter twi_xfer_done to be set to true. This is what we will do in our TWI callback. As you may remember, the callback function has some "input" parameters. `p_context` would be the same as we input as p_contect in `nrfx_twim_init()`, so that is NULL (not very useful). But the `p_event` parameter holds some information about the callback. Look at the declaration of `nrfx_twim_evt_t` in `nrfx_twim.h`. You can see that it has two parameters. `type` and `xfer_desc`. The type, `nrfx_twim_evt_type_t` is also defined in `nrfx_twim.h`, and it is an enum with all the possible values. We want to create a switch case for these event types. NRFX_TWIM_EVT_DONE means that a message was succesfully sent and ACKed, which is just what we are looking for. For the rest of the event types, we will just log something, so that we can detect if any of those occur.
+
+</br>
+
+Add this to your already existing `my_twim_handler()` function:
+
+```C
+void my_twim_handler(nrfx_twim_evt_t const * p_event, void * p_context)
+{
+    // LOG_INF("TWIM callback");
+    switch(p_event->type)
+    {
+        case NRFX_TWIM_EVT_DONE:
+            twi_xfer_done = true;   // This is the event we are waiting for.
+            break;
+        case NRFX_TWIM_EVT_ADDRESS_NACK:
+            LOG_ERR("address nack");
+            break;
+        case NRFX_TWIM_EVT_DATA_NACK:
+            LOG_ERR("data nack");
+            break;
+        case NRFX_TWIM_EVT_OVERRUN:
+            LOG_ERR("overrun");
+            break;
+        case NRFX_TWIM_EVT_BUS_ERROR:
+            LOG_ERR("bus error");
+            break;
+        default:
+            LOG_ERR("default (should never happen)");
+            break;
+    }
+    
+}
+```
+
+If we wanted to, we could use the parameter p_event->xfer_desc.type, which is a member of the enum `nrfx_twim_xfer_type_t` also from `nrfx_twim.h` to check whether the callback belongs to a read or a write. But we will not use that in our project. 
+
+Now everything is set up for us to both read and send data over TWI to our sensor. The first thing we need to do is to configure our MPU6050 to operate in the mode that we want to. 
+Going back to our `mpu_sensor_init()` function, let us add a new function called `app_mpu_config()`, and call it from `mpu_sensor_init()`. Make it return an int, and either check that return value (should be 0) in `mpu_sensor_init()`, or make `mpu_sensor_init()` return that value, so that it can be checked from main.c.
+
+</br> 
+We are about to send our first TWI message. We want to reset the MPU after we start up our application. To do so, we look up the different registers in the [datasheet](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf). If you look on page 8, you can see that there is a register called `SIGNAL_PATH_RESET`. This is described in more detail on page 37. We see that the 3 least significant bits reset the gyro, accellerometer and temperature sensor. We want to reset all of them, so the value that we want to send to this register is 0b00000111 (binary) = 0x07 (hexadecimal).
+Try to find the macro/definition of this register in mpu6050_registers.h, and use the function app_mpu_write_single_register() to write 0x07 to that register. This function is blocking, meaning it will not return before the transmission is complete. Check whether the message was successfully sent or timed out by examining the return value from `app_mpu_write_single_register()`.
+
+</br>
+If you succeeded, we also want to write a value to the register called PWR_MGMT_1 (look it up on page 8 in the datasheet). See if you can find the page where this register is described in more detail, and make sure that this register is configured to use the "PLL with X axis gyroscope reference".
+Remember to check whether this message/transfer is ACKed successfully or if it times out.
+
+</br>
+Lastly we need to send some configurations. We want to write something to the registers SMPLRT_DIV, CONFIG, GYRO_CONFIG and ACCEL_CONFIG. It is a lot, but let us start by creating some structs to simplify things a bit. Add this to your mpu_sensor.h file:
+
+```C
+/* Enum defining Accelerometer's Full Scale range posibillities in Gs. */
+enum accel_range {
+  AFS_2G = 0,       // 2 G
+  AFS_4G,           // 4 G
+  AFS_8G,           // 8 G
+  AFS_16G           // 16 G
+};
+
+/* Enum defining Gyroscope's Full Scale range posibillities in Degrees Pr Second. */
+enum gyro_range {
+  GFS_250DPS = 0,   // 250 deg/s
+  GFS_500DPS,       // 500 deg/s
+  GFS_1000DPS,      // 1000 deg/s
+  GFS_2000DPS       // 2000 deg/s
+};
+
+
+
+/* MPU driver digital low pass fileter and external Frame Synchronization (FSYNC) pin sampling configuration structure */
+typedef struct
+{
+    uint8_t dlpf_cfg     :3; // 3-bit unsigned value. Configures the Digital Low Pass Filter setting.
+    uint8_t ext_sync_set :3; // 3-bit unsigned value. Configures the external Frame Synchronization (FSYNC) pin sampling.
+    uint8_t              :2;
+}sync_dlpf_config_t;
+
+/* MPU driver gyro configuration structure. */
+typedef struct
+{
+
+    uint8_t                 :3;
+    uint8_t fs_sel          :2; // FS_SEL 2-bit unsigned value. Selects the full scale range of gyroscopes.
+    uint8_t                 :3;
+}gyro_config_t;
+
+/* MPU driver accelerometer configuration structure. */
+typedef struct
+{
+    uint8_t                 :3;
+    uint8_t afs_sel         :2; // 2-bit unsigned value. Selects the full scale range of accelerometers.
+    uint8_t za_st           :1; // When set to 1, the Z- Axis accelerometer performs self test.
+    uint8_t ya_st           :1; // When set to 1, the Y- Axis accelerometer performs self test.
+    uint8_t xa_st           :1; // When set to 1, the X- Axis accelerometer performs self test.
+}accel_config_t;
+
+/* MPU driver general configuration structure. */
+typedef struct
+{
+    uint8_t             smplrt_div;         // Divider from the gyroscope output rate used to generate the Sample Rate for the MPU-9150. Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
+    sync_dlpf_config_t  sync_dlpf_config;   // Digital low pass fileter and external Frame Synchronization (FSYNC) configuration structure
+    gyro_config_t       gyro_config;        // Gyro configuration structure
+    accel_config_t      accel_config;       // Accelerometer configuration structure
+}app_mpu_config_t;
+```
+
+It looks messy, but what we are doing is that we add app_mpu_config_t as a parameter. This has other members, such as the sync_dlpf_gonfig, gyro_config and accel_config. All the numbers behind the name of the parameters (in gyro_config and accel_config) are used to set these parameters to specific bits. Note that they always add up to 8 bits = one byte.
+In addition, we created some enums, which are used to give names to some of the configurations, e.g. so that we can use the name AFS_2G instead of 0. If you look at the respective register descriptions in the datasheet, you can see what the different bits and enums represent.
+
+After adding these, you can add the following to our app_mpu_config.
+
+```C
+    app_mpu_config_t mpu_config = {
+        .smplrt_div                     = 19,             \
+        .sync_dlpf_config.dlpf_cfg      = 1,              \
+        .sync_dlpf_config.ext_sync_set  = 0,              \
+        .gyro_config.fs_sel             = GFS_2000DPS,    \
+        .accel_config.afs_sel           = AFS_2G,         \
+        .accel_config.za_st             = 0,              \
+        .accel_config.ya_st             = 0,              \
+        .accel_config.xa_st             = 0,              \
+    };
+```
+
+Lastly, use the mpu_config and the app_mpu_write_registers() function to write our configuration to the MPU:
+
+```C
+    // This belongs in the end of app_mpu_config().
+
+    uint8_t *data;
+    data = (uint8_t*)&mpu_config; // Casting to a normal uint8_t so that app_mpu_write_register will accept it as an input parameter.
+    
+    err = app_mpu_write_registers(MPU_REG_SMPLRT_DIV, data, 4);
+    return err;
+```
+
+Congratulations! You are done setting up your MPU. Now all that remains is to read out the sensor data at will.
+
+We are about to implement a function that can be called from `main.c` (or whatever file that includes `mpu_sensor.h`). Therefore we need to declare it in `mpu_sensor.h`, so that the compiler knows that it exists outside `mpu_sensor.c`.
+Declare and implement empty functions (that returns 0) in `mpu_sensor.h` and `mpu_sensor.c`. Call them `read_accel_values()` and `read_gyro_values()`.
+
+</br>
+We will leave `read_gyro_values()` empty for now, but we will implement `read_accel_values()`. This is a function that we want to use to read out three values, the accellerometer values for the X, Y and Z axis. This means that we can't return it as a single value at the end of the function. The way we usually do this in C is that we take an input parameter holding the X Y and Z values. Let us start by adding a struct in `mpu_sensor.h` called `accel_values_t` that holds an X, Y and a Z parameter. Looking at the datasheet for our sensor again, we see that the registers we want to read out are:
+</br>
+ACCEL_XOUT_H
+</br>
+ACCEL_XOUT_L
+</br>
+ACCEL_YOUT_H
+</br>
+ACCEL_YOUT_L
+</br>
+ACCEL_ZOUT_H
+</br>
+ACCEL_ZOUT_L
+</br>
+
+Each of these are one byte = 8 bits, meaning that we will read out 16 bits for each axis. Hence, we will make our X, Y and Z parameters `uint16_t` parameters. We will add the same for gyro_values_t while we are at it. Add this to `mpu_sensor.h`:
+
+```C
+/* Structure to hold acceleromter values.
+ * All values are unsigned 16 bit integers
+*/
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+}accel_values_t;
+
+
+/*Structure to hold gyroscope values. 
+ * All values are unsigned 16 bit integers
+*/
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+}gyro_values_t;
+```
+
+And finally for our read_accel_values() function, we want to take `accel_values_t * p_accel_values` as an input parameter. (remember to also add that to the declaration in `mpu_sensor.h`). Let us use app_mpu_read_registers() to read out the 6 registers that makes up the accellerometer values in X, Y and Z:
+
+```C
+int read_accel_values(accel_values_t * p_accel_values)
+{
+    int err;
+    uint8_t raw_values[6];
+    err = app_mpu_read_registers(MPU_REG_ACCEL_XOUT_H, raw_values, 6);
+    /** The data will come back bytewise in the following order (see registers from mpu6050.h) :        *
+      * raw_values[0] = MPU_REG_ACCEL_XOUT_H     ACCEL_XOUT[15:8]                                       *
+      * raw_values[1] = MPU_REG_ACCEL_XOUT_L     ACCEL_XOUT[ 7:0]                                       *
+      * raw_values[2] = MPU_REG_ACCEL_YOUT_H     ACCEL_YOUT[15:8]                                       *
+      * raw_values[3] = MPU_REG_ACCEL_YOUT_L     ACCEL_YOUT[ 7:0]                                       *
+      * raw_values[4] = MPU_REG_ACCEL_ZOUT_H     ACCEL_ZOUT[15:8]                                       *
+      * raw_values[5] = MPU_REG_ACCEL_ZOUT_L     ACCEL_ZOUT[ 7:0]                                       **/
+    if (err) {
+        LOG_ERR("Could not read accellerometer data. err: %d", err);
+        return err;
+    }
+    return 0;
+}
+```
+
+As long as err == 0, we have successfully read out the parameters. Let us populate them into the p_accel_values:
+
+```C
+    [...]
+    p_accel_values->x = ((raw_values[0]<<8) + raw_values[1]);
+    p_accel_values->y = ((raw_values[2]<<8) + raw_values[3]);
+    p_accel_values->z = ((raw_values[4]<<8) + raw_values[5]);
+    return 0;
+}
+```
+
+Please note the bitshifting used to combine two bytes (uint8_t) into one uint16_t.
+
+Finally, let us add this to our main() loop. Go to main.c, and create a parameter of type accel_values_t near the top of your `main()` function. Lastly, your main-loop should have a call to k_sleep() which is set to sleep for 1 second. If you add the `read_accel_values()` right before (or after) that sleep, it will read out the accellerometer values every second:
+
+```C
+    // This belongs to your main-loop.
+        dk_set_led(RUN_STATUS_LED, (blink_status++)%2);
+        if (read_accel_values(&accel_values) == 0) {
+            LOG_INF("# %d, Accel: X: %06d, Y: %06d, Z: %06d", blink_status, accel_values.x, accel_values.y, accel_values.z);
+        }
+        k_sleep(K_MSEC(RUN_LED_BLINK_INTERVAL));
+```
+
+Note that we only print the accelleration values if `read_accel_values()` returns 0. Do you see the accellerometer values in your log?
+</br>
+
+If you got stuck during this part of the tutorial, here you can check my final copy of the files:
+</br>
+[mpu_sensor.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot4/mpu_sensor.c) 
+</br>
+[mpu_sensor.h](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot4/mpu_sensor.h)
+</br>
+[mpu6050_registers.h](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot4/mpu6050_registers.h)
+
+
+### Step 4 - Motor control
+Time to add some movement to our PWM motor. The motor that we used is the Tower Pro MG90S. You can find a very simplified datasheet [here](https://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf). For some background information on how PWM motors work, you can check out [this guide](https://www.jameco.com/Jameco/workshop/Howitworks/how-servo-motors-work.html).
+Basically, we want to output a PWM signal, and the duty cycle of the PWM signal determines what angle/position the rotor will maintain. In our case, the motor wants a duty cycle between 1 and 2 ms, and a PWM period of 20ms. 
+Because we still want to keep main.c as clutter free as possible, we will try to do most of the PWM configurations and handling in another file, and implement some simple functions that we can call from main.c. Therefore we will add a few more custom files. Inside your `custom_files` folder, create two new files: `motor_control.h` and `motor_control.c`. To include these to your project, open CMakeLists.txt, and add the following snippet at the end:
+</br>
+**Note the `;` after `mpu_sensor.c`**
+```C
+# Custom files and folders
+
+target_sources(app PRIVATE
+    src/custom_files/mpu_sensor.c;
+    src/custom_files/motor_control.c
+)
+
+zephyr_library_include_directories(src/custom_files)
+```
+
+
+
+If all goes well, the project should compile, and we should be able to see our motor_control.c in our application tree as well. Open `motor_control.c` and start by adding this line to the very top:
+
+```C
+#include "motor_control.h"
+```
+
+Open `motor_control.h` and add:
+```C
+#include <zephyr.h>
+#include <logging/log.h>
+```
+
+**Challenge:** </br>
+Just like we did in the `mpu_sensor` files, create a function called `motor_init()` that returns 0 and prints *"Initializing Motor Control"* to your log.
 
 
 **PWM control**
-When we are using the nRF Connect SDK, we have several driver options to control the PWM. We have our own drivers that are tailored for the Nordic Semiconductor devices, or we can use Zephyr's drivers, which will use Nordic's drivers beneath the hood. In this tutorial we will use Nordic's drivers directly, for simplicity. 
+When we are using the nRF Connect SDK, we have several driver options to control the PWM. We have our own drivers that are tailored for the Nordic Semiconductor devices, or we can use Zephyr's drivers, which will use Nordic's drivers "underneath the hood". For the PWM we will use the Zephyr drivers. 
 Let us start by adding some configurations to our prj.conf file:
 
 ```C
 # PWM
 CONFIG_PWM=y
-CONFIG_NRFX_PWM1=y
+CONFIG_PWM_LOG_LEVEL_DBG=y
 ```
 
 What we are doig here is that we enable the PWM in general, and we tell it to use PWM instance 1.
 Then we can continue by adding the pwm header file near the top of `motor_control.h`. `motor_control.c` will inherit this, as long as it includes `motor_control.h`.
 
 ```C
-#include "nrfx_pwm.h"
+#include <zephyr/drivers/pwm.h>
 ```
 
-Open `nrfx_pwm.h` and see if you can find a function that will initialize the PWM driver. `nrfx_err_t nrfx_pwm_init(...)` looks promising. This function has 4 parameters. We only need the first two. The rest we can set to NULL, as we don't need any callbacks or context pointer to pass on to the callback. 
-The first parameter is the pointer to an instance. We can use the macro *NRFX_PWM_INSTANCE()* (from nrfx_pwm.h) to define this instance. The second parameter is the configuration that we want to use. The configuration holds information such as the pin number, the PWM frequency, and so on. We can use another macro, *NRFX_PWM_DEFAULT_CONFIG* to set most things, and then we can tweak it later. 
+The beauty of Zephyr drivers is that once we have enabled them through configurations in our prj.conf file, it will automagically be enabled and ready for use. All we need to do is to specify what instance we want to use. Therefore, close to the top of motor_control.c, add this line:
+```C
+static const struct pwm_dt_spec pwm_led0 = PWM_DT_SPEC_GET(DT_ALIAS(pwm_led0));
+```
 
-<br>
+It doesn't need to be inside a function. This is just a declaration of a variable.
+You can see here that this uses a variable called `pwm_led0`. This is the LED1 on our DK. We would want to change this later, but for now, we will keep LED1 as our PWM pin, just to see that it is working. This line will find our pwm_leds instance, and use LED1 as the default PWM pin. FYI: You can see on the backside of the nRF52840 DK that the LED1 pin is P0.13, so toggling the LED will also toggle that GPIO on the GPIO header on the DK.
 
-Short background: The way that the PWM works is that it is a counter counting from 0 to .top_value at the speed of 1MHz. 
-When it reaches our threshold/pwm_duty_cycle (which we will set later) it will set the pin in active state, and when the counter's .top_value is reached, it puts the pin in inactive state, and resets the counter. 
-<br>
-If you study the configuration in *NRFX_PWM_DEFAULT_CONFIG* in nrfx_pwm.h, we see that most of these are ok. What we need to adjust a few things. The PWM period that we want to use is 20ms = 20000µs. Since our PWM clock is running at 1MHz (from *NRFX_PWM_DEFAULT_CONFIG*), we want to set our config's .top_value = 20000. 
-We also want to set the parameter .load_mode. I will not go into details, but it has to do with how many bits in a pwm value that is used. The last thing we want to decide is what GPIO pin that we will use for the PWM signal. 
-If you look at the backside of the DK, you can see that some of the pins are used for LEDs, buttons, NFC, serial communication, etc. Try to avoid these. P0.03 (and close to both GND and VDD), so we can use that. 
-
-
-
+</br>
+next we want to check that our PWM channel is ready when this part of the code is reached. Add these lines to our `motor_init()` function:
 
 ```C
-// Near the top of motor_control.c:
-#define SERVO_PIN                           3
-#define PWM_PERIOD                          20000
-static nrfx_pwm_t pwm = NRFX_PWM_INSTANCE(1);
+    if (!device_is_ready(pwm_led0.dev)) {
+    LOG_ERR("Error: PWM device %s is not ready",
+            pwm_led0.dev->name);
+    return -EBUSY;
+	}
+```
 
-// implementation of motor_init():
+<br>
+
+**Short background:** The way that PWM works is that it is a counter counting from 0 up to a `PWM period`. It starts with the PWM pin being high, and when it reaches a certain value called the `PWM duty cycle` the PWM signal will go low. When the counter reaches PWM period, the PWM pin will reset to high. See the figure from our servo motor specification:
+
+PWM Period and PWM Duty Cycle | 
+------------ |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/PWM_figure.PNG" width="300"> |
+
+
+**Challenge:** Before we connect our motor, let us try to generate a PWM signal using our LED. You can give this a go without looking at the solution below. Open pwm.h (ctrl + p, and search for pwm.h), and look at the description for pwm_set_dt(). Looking at our servo motor's [data sheet](https://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf), we see that we should have a period of 20ms, and a duty cycle between 1 and 2 ms. Try to set a PWM signal of 1.5ms, with a period of 20ms. 
+
+*Hint: the `spec` parameter is our pwm_led0. Since it requires a pointer, you need to use `&pwm_led0` when you use it in pwm_set_dt().*
+
+</br>
+
+I will show you how I did it in a second, but if you managed to set the duty cycle of 1.5ms, you should see a faint light on LED1 on your DK. That is good and all, but we originally used LED1 for something else (showing us that the main() loop was running), so ideally we want to use another pin for PWM control. To do this, we need to edit our nrf52840dk_nrf52840.overlay file again. Let us try to move the pin to P0.02, so that we can free up our LED1 for our main loop agian. Before we do so, this is what my `motor_init()` currently looks like:
+
+```C 
+//define close to top of motor_control.c:
+#define PWM_PERIOD_NS 20000000
 int motor_init(void)
 {
+    int err = 0;
     LOG_INF("Initializing Motor Control");
 
-    nrfx_err_t err;
-    nrfx_pwm_config_t pwm_config    = NRFX_PWM_DEFAULT_CONFIG(SERVO_PIN, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED, NRFX_PWM_PIN_NOT_USED);
-    pwm_config.top_value            = PWM_PERIOD;
-    pwm_config.load_mode            = NRF_PWM_LOAD_INDIVIDUAL;
-    
-    err = nrfx_pwm_init(&pwm, &pwm_config, NULL, NULL);
-    if (err != NRFX_SUCCESS) {  // NB: NRFX_SUCCESS != 0
-        LOG_ERR("nrfx_pwm_init() failed, err %d", err);
+    if (!device_is_ready(pwm_led0.dev)) {
+    LOG_ERR("Error: PWM device %s is not ready",
+            pwm_led0.dev->name);
+    return -EBUSY;
+	}
+
+    err = pwm_set_dt(&pwm_led0, PWM_PERIOD_NS, 1500000);
+    if (err) {
+        LOG_ERR("pwm_set_dt returned %d", err);
     }
-    
-    return 0;
+
+    return err;
 }
-
 ```
 
-In theory (!) our motor is now operational as soon as you connect it. Connect the brown wire to GND, the red wire to VDD and the orange to the PWM signal pin (P0.03). However, we haven't actually told the PWM driver to set a PWM signal yet. Let us start by adding this to our motor_init() function to test that it works. Look for nrfx_pwm_simple_playback() in nrfx_pwm.h, and see if you can apply it to set the PWM signal of your motor. Remember to call nrfx_pwm_simple_playback before your `return 0;`.
-How to set this frequency is not trivial, since the second parameter is a double pointer to the actual duty cycle, so we will walk through it. If you want to try for yourself, you can stop reading here, and look into the `nrfx_pwm.h` file. 
+If you open your nrf52840dk_nrf52840.dts, which is our standard board file, we can see what pwm_led0 looks like by default:
 
-<br>
+pwm_led0 default configuration | 
+------------ |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/pwm_led0_dts.PNG"> |
 
-The nrfx_pwm_simple_playback() expects a pointer to a nrf_pwm_sequence_t parameter. It also holds a parameter indicating the length of this array. This is all we will use, and we will set the rest to 0. The array with the PWM values is a parameter with the type nrf_pwm_sequence_t, so let us start by implementing this near the top of motor_control.c:
+
+While it would be possible, we don't want to change anything inside this file, because those changes will stick to all other projects that are using the same board file. This is why we want to do the changes in our overlay file, just like we did with our I2C. Unfortunately, the pin number is not set here directly. It is set in &pwm0 inside pwm_led0. But since the default configuration for pwm_led0 is PWM_POLARITY_INVERTED, and we want to change that as well, we need to add the pwmleds snippet to our overlay file as well. 
+Let us start by adding a pwmleds snippet to our `nrf52840dk_nrf52840.overlay` file. This will overwrite the default settings from the .dts file.
 
 ```C
-static  nrf_pwm_values_individual_t position_1[] = {
-    {19000},
-};
-static  nrf_pwm_values_individual_t position_2[] = {
-    {18000},
+/{
+    pwmleds {
+        compatible = "pwm-leds";
+        pwm_led0: pwm_led_0 {
+            pwms = <&pwm0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+        };
+    };
 };
 ```
 
-You may remember that our motor's datasheet said that the PWM duty cycle should be between 1ms and 2ms on logic high, and low for the rest of the period. This would be 1000 and 2000 ticks in our case. However, this PWM driver has an active low configuration, so the easiest workaround for this is to just say that the duty cycle is the period minus the actual duty cycle. So for 1ms that would be 20000 - 1000 = 19000. 
-
-Then we will implement the nrf_pwm_sequence_t parameter, which uses the nrf_pwm_values_individual_t:
+You can see here that the only change we did was to change the polarity from inverted to normal. This means that the PWM signal will have a high output for the duty cycle, instead of low. If you right click and select "go to definition" on the `&pwm0` in your overlay file, you will see something like this:
 
 ```C
-static nrf_pwm_sequence_t position_1_sequence = {
-    .values.p_individual    = position_1,
-    .length                 = NRF_PWM_VALUES_LENGTH(position_1),
-    .repeats                = 0,
-    .end_delay              = 0
-};
-static nrf_pwm_sequence_t position_2_sequence = {
-    .values.p_individual    = position_2,
-    .length                 = NRF_PWM_VALUES_LENGTH(position_2),
-    .repeats                = 0,
-    .end_delay              = 0
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0_default>;
+	pinctrl-1 = <&pwm0_sleep>;
+	pinctrl-names = "default", "sleep";
 };
 ```
 
-Now we can finally use these "sequences" to set the angle of our motor by adding this line to our `motor_init()`:
+So our pin numbers are set in pwm0_default and pwm0_sleep. Let us start by changing the names of these as we add this to our `overlay` file:
+
 ```C
-nrfx_pwm_simple_playback(&pwm, &position_1_sequence, 50, NRFX_PWM_FLAG_STOP);
+&pwm0 {
+    status = "okay";
+    pinctrl-0 = <&pwm0_custom>;
+    pinctrl-1 = <&pwm0_csleep>;
+    pinctrl-names = "default", "sleep";
+};
 ```
 
-This will cause the motor to go to "position 1", and stay there for 50 PWM periods (1 second), and then turn off. 
+You can call them whatever you like. I used pwm0_custom and pwm0_csleep. The last part we need to do is that we need to define pwm0_custom and pwm0_csleep. Try right clicking the pwm0_default and pwm0_sleep in the .dts file to see hwat they look like by default:
 
-**Challenge:**
-<br>
-Use what you now know to make two of the buttons in the button handler from main.c control the motor between "position_1" and "position_2"
+```C
+&pinctrl {
+	pwm0_default: pwm0_default {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 0, 13)>;
+			nordic,invert;
+		};
+	};
+    
+	pwm0_sleep: pwm0_sleep {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 0, 13)>;
+			low-power-enable;
+		};
+	};
+};
+```
 
-<br>
+Note that I added the `&pinctrl {` and `};` at the top and bottom, since we need this when we copy it into our `.overlay` file. 
 
-*Hint: If you are stuck, you can see a suggested solution for main.c, and motor_control.c/h here:
+Add this to your `.overlay` file (with the names that you used in `&pwm0`:
 
-<br>
+```C
+&pinctrl {
+    pwm0_custom: pwm0_custom {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            nordic,invert;
+        };
+    };
 
-[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot0/main.c)</br>
-[motor_control.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/motor_control.c)</br>
-[motor_control.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/motor_control.h)</br>
+    pwm0_csleep: pwm0_csleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            low-power-enable;
+        };
+    };
+};
+```
 
-### Step 4 - Adding Bluetooth
+FYI: the `0, 2` is port 0, pin 2. If you wanted to use e.g. pin P1.15, you would set `psels = <NRF_PSEL(PWM_OUT0, 1, 15). 
+
+In the end, your `nrf52840dk_nrf52840.overlay` file should look something like this:
+
+```C
+&i2c0 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    clock-frequency = < I2C_BITRATE_STANDARD >;
+};
+
+&pinctrl {
+    pwm0_custom: pwm0_custom {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            nordic,invert;
+        };
+    };
+
+    pwm0_csleep: pwm0_csleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            low-power-enable;
+        };
+    };
+};
+
+&pwm0 {
+    status = "okay";
+    pinctrl-0 = <&pwm0_custom>;
+    pinctrl-1 = <&pwm0_csleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+/{
+    pwmleds {
+        compatible = "pwm-leds";
+        pwm_led0: pwm_led_0 {
+            pwms = <&pwm0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+        };
+    };
+};
+```
+
+Try to connect the servo motor. It has three wires. One brown, which you can connect to GND. Then you have one Red, which you can connect to VDD (not the one marked 5V), and then connect the yellow/orange wire to whatever pin you chose for your PWM pin (probably P0.02). 
+Does the motor move?
+
+If it does, you can try to create a function inside motor_control.c that you can call from e.g. the button handler to set the pwm signal to different values between 1ms and 2ms. These motors are cheap, so some motors goes 180 degrees between 1ms and 2ms, but yout milage may vary. Try out different values to see what the limits are for your motor. When I tested one of the motors, it turned out that the limirs were 0.4ms and 2.4ms. 
+Call the function `set_motor_angle()` and make it return an int (0 on success, negative value on error). Declare it in motor_control.h, and implement it in motor_control.c. make it have an input parameter either as a PWM duty cycle, or an input angle (degrees between 0 and 180).
+
+Use this to set different angles, depending on what button you pressed. 
+
+### Step 5 - Adding Bluetooth
 It is finally time to add bluetooth to our project. A hint was given in the project name, but in case you missed it, we will write an application that mimics some sort of bluetooth remote, where we will be able to send button presses to a connected Bluetooth Low Energy Central. We will also add the oppurtynity to write back to the remote control. That may not be a typical feature for a remote control, but for the purpose of learning how to communicate in both directions we will add this. The connected central can either be your phone, a computer, or another nRF52. For this guide we will use a separate DK and nRF Connect for Desktop -> Bluetooth, but if you only have one DK, you can use [nRF Connect for iOS or Android.](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile)
 </br>
 </br>
@@ -408,6 +1112,7 @@ Because we want to keep our main.c clean, we will try to do most of the bluetoot
 
 target_sources(app PRIVATE
     src/custom_files/motor_control.c;
+    src/custom_files/mpu_sensor.c;
     src/custom_files/remote.c
 )
 
@@ -468,7 +1173,7 @@ After this (rebuild required), it is time to see what bt_enable does. In nRF Con
 
 Visual Studio Code Navigation | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/VSC_hint.png"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/VSC_hint.png"> |
 
 </br>
 
@@ -562,13 +1267,13 @@ Note that all the screenshots are using nRF Connect for iOS. If you are using nR
 
 Scan uisng nRF Connect for Mobile | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/scan_advertisements_mobile.PNG" width="300"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/scan_advertisements_mobile.PNG" width="300"> |
 
 If you select this device, you should be able to see some information from the advertisements. The name should appear as we set it in our prj.conf, and the service should match the service UUID should be visible, and match the service UUID that we defined in remote.h.
 
 Advertisement description | Listed UUIDs |
 ------------ | ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/advertisement_description_mobile.PNG" width="300"> | <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/UUID_list_mobile.PNG" width="300"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/advertisement_description_mobile.PNG" width="300"> | <img src="https://github.com/edvinand/Orbit/blob/main/images/UUID_list_mobile.PNG" width="300"> |
 
 
 </br>
@@ -630,12 +1335,12 @@ If you followed the guide this far, your files should look something like this. 
 
 </br>
 
-[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/main.c)</br>
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.c)</br>
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot1/custom_files/remote.h)</br>
+[main.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot1/main.c)</br>
+[remote.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot1/custom_files/remote.c)</br>
+[remote.h](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot1/custom_files/remote.h)</br>
 
 
-### Step 5 - Adding our First Bluetooth Service
+### Step 6 - Adding our First Bluetooth Service
 Let us add the service that we claim that we have when we advertise. We will use the macro BT_GATT_SERVICE_DEFINE to add our service. It is quite simple at the same time as it is quite complex. When we use this macro to create and add our service, the rest is done "under the hood" of NCS/Zephyr. By just adding this snippet to remote.c
 
 ```C
@@ -648,7 +1353,7 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
 And voila! We have our first Bluetooth Low Energy service. Try to connect to it using nRF Connect, and see that you can see the service.
 Our first service | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/custom_service_mobile.jpg" width="300"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/custom_service_mobile.jpg" width="300"> |
 
 However, a service without any characteristics isn't very impressive. Let us add a characteristic that we can read from our Central. </br>
 We start by defining a new UUID for our characteristic. Basically, you can copy your previous UUID define and increment the two bytes that you set to 0001 to 0002:
@@ -720,18 +1425,18 @@ static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct 
 
 *Hint: If you are stuck, I uploaded another snapshot of the project here:*
 
-[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/main.c), 
+[main.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot2/main.c), 
 
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.c), 
+[remote.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot2/custom_files/remote.c), 
 
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot2/custom_files/remote.h).
+[remote.h](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot2/custom_files/remote.h).
 
 </br>
 </br>
 Now, try to connect to your device using nRF Connect, and see that you have a characteristic that you can read using the read button in nRF Connect (the button with the down pointing arrow). Whenever you push a button on your DK and read it again, you should see that the is updated.
 
 
-### Step 6 - Characteristic Notifications
+### Step 7 - Characteristic Notifications
 We do not want to keep having to ask our peripheral about the last pressed button all the time. It requires a lot of read requests and read response packets on the air, which is not very power efficient. Therefore we have something called "notifications", which allows the peripheral to push changes to the central whenever they occur. This is set using something called Client Characteristic Configuration Descriptor (CCCD or CCC). The first thing we need to do is to add this descriptor to our characteristic. Do this by adding the last line to your Service macro in remote.c:
 
 ```C
@@ -883,11 +1588,11 @@ Now try to call this function from the button handler, check the return value an
 </br>
 </br>
 *In case you got stuck anywhere since the last snapshot, I'll upload a 3rd snapshot here:</br>
-[main.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/main.c)</br>
-[remote.c](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/custom_files/remote.c)</br>
-[remote.h](https://github.com/edvinand/OmegaV_BLE_Course/blob/main/temp_files/snapshot3/custom_files/remote.h)*
+[main.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot3/main.c)</br>
+[remote.c](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot3/custom_files/remote.c)</br>
+[remote.h](https://github.com/edvinand/Orbit/blob/main/temp_files/snapshot3/custom_files/remote.h)*
 
-### Step 7 - Writing Bck to our Peripheral
+### Step 8 - Writing Bck to our Peripheral
 So now we can send button presses from our remote to our phone. Pretty cool. But since we have a wireless device connected to our phone, and this device has a motor connected to it, it would be nice to be able to control the motor from the phone, right? For this we could use the same characteristic that we already have to send communications both ways, but let us create a new characteristic for this purpose.
 
 **Todo:**</br>
@@ -975,7 +1680,7 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
     temp_str[len] = 0x00;
 
     LOG_INF("Received data on conn %p. Len: %d", (void *)conn, len);
-    LOG_INF("Data: %s", log_strdup(temp_str));
+    LOG_INF("Data: %s", temp_str);
 }
 ```
 What we are doing here is first that we copy the content of the data pointer to a temporary string. This is not strictly necessary, but in this case we want to print the data to the log, and one way to do that is to use the log_strdup() which is looking for a zero-terminated string. To avoid writing to the actual data buffer (which is a very bad idea) we copy the content and add a 0x00 byte at the end.
@@ -987,7 +1692,7 @@ Try to write to your new characteristic. Note that when you press the write butt
 
 Writing to a Characteristic | 
 ------------ |
-<img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/write_to_characteristic.jpg" width="300"> |
+<img src="https://github.com/edvinand/Orbit/blob/main/images/write_to_characteristic.jpg" width="300"> |
 
 <br>
 
@@ -999,4 +1704,4 @@ But we said that we wanted to control our motors using these messages. Try to ch
 *Hint: Perhaps just check whether the first byte is 0x00 or 0x01, and set the motor to one of two predefined angles.*
 
 
-You can find the final version of the files in the NCS project [here](https://github.com/edvinand/OmegaV_BLE_Course/tree/main/remote_controller/src).
+You can find the final version of the files in the NCS project [here](https://github.com/edvinand/Orbit/tree/main/remote_controller/src).

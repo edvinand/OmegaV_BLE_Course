@@ -1,0 +1,37 @@
+&i2c0 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    clock-frequency = < I2C_BITRATE_STANDARD >;
+};
+
+&pinctrl {
+    pwm0_custom: pwm0_custom {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            nordic,invert;
+        };
+    };
+
+    pwm0_csleep: pwm0_csleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            low-power-enable;
+        };
+    };
+};
+
+&pwm0 {
+    status = "okay";
+    pinctrl-0 = <&pwm0_custom>;
+    pinctrl-1 = <&pwm0_csleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+/{
+    pwmleds {
+        compatible = "pwm-leds";
+        pwm_led0: pwm_led_0 {
+            pwms = <&pwm0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+        };
+    };
+};
