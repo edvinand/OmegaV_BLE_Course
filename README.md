@@ -362,7 +362,7 @@ PWM Period and PWM Duty Cycle |
 
 </br>
 
-If it builds successfully, you should see that the `nrf52840dk_nrf52840.overlay` file will appear as one of your `Input files` in Visual Studio Code. Open the file, and let us try to change the PWM from using LED1 to P0.03, so that we can free up our LED1 for our main loop agian. Before we do so, this is what my `motor_init()` currently looks like:
+If it builds successfully, you should see that the `nrf52840dk_nrf52840.overlay` file will appear as one of your `Input files` in Visual Studio Code. Open the file, and let us try to change the PWM from using LED1 to P0.03, so that we can free up our LED1 for our main loop agian. I chose P0.03. because it is physically close to both VDD and GND on our DK. Before we do so, this is what my `motor_init()` currently looks like:
 
 ```C 
 //define close to top of motor_control.c:
@@ -458,14 +458,14 @@ Add this to your `.overlay` file (with the names that you used in `&pwm0`:
 &pinctrl {
     pwm0_custom: pwm0_custom {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             nordic,invert;
         };
     };
 
     pwm0_csleep: pwm0_csleep {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             low-power-enable;
         };
     };
