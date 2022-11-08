@@ -7,7 +7,6 @@
 #include <zephyr.h>
 #include <logging/log.h>
 #include <dk_buttons_and_leds.h>
-#include "mpu_sensor.h"
 #include "motor_control.h"
 #include "remote.h"
 
@@ -19,7 +18,7 @@ static struct bt_conn *current_conn;
 /* LEDs */
 #define RUN_STATUS_LED DK_LED1
 #define CONN_STATUS_LED DK_LED2
-#define RUN_LED_BLINK_INTERVAL 50
+#define RUN_LED_BLINK_INTERVAL 1000
 
 /* Declarations */
 
@@ -150,47 +149,14 @@ static void configure_dk_buttons_and_leds(void)
     }
 }
 
-void control_motor(accel_values_t * accel_values, accel_values_t * min_values, accel_values_t * max_values)
-{
-    //update min/max:
-    int16_t offset_x;
-    int16_t calibrated_x;
-    uint32_t duty_cycle;
-    double gain = 50;
-    if (accel_values->x < min_values->x) {
-        min_values->x = accel_values->x;
-    }
-    else if (accel_values->x > max_values->x) {
-        max_values->x = accel_values->x;
-    }
-
-    offset_x = (max_values->x + min_values->x)/2;
-    calibrated_x = accel_values->x - offset_x;
-    //translate x to motor angle:
-    duty_cycle = MEAN_DUTY_CYCLE; // middle position
-    duty_cycle += (calibrated_x*gain);
-
-    LOG_INF("calibrated x: %06d, duty_cycle: %08d", calibrated_x, duty_cycle);
-
-    set_motor_angle(duty_cycle);
-}
 
 void main(void)
 {
     int err;
     int blink_status = 0;
 	LOG_INF("Hello World! %s", CONFIG_BOARD);
-    accel_values_t accel_values;
-    accel_values_t min_values = {0};
-    accel_values_t max_values = {0};
-    //gyro_values_t gyro_values;
 
     configure_dk_buttons_and_leds();
-
-    err = mpu_sensor_init();
-    if (err) {
-        LOG_ERR("mpu_init() failed. (err %08x)", err);
-    }
 
     err = motor_init();
     if (err) {
@@ -206,10 +172,6 @@ void main(void)
 
     for (;;) {
         dk_set_led(RUN_STATUS_LED, (blink_status++)%2);
-        if (read_accel_values(&accel_values) == 0) {
-            LOG_INF("# %d, Accel: X: %06d, Y: %06d, Z: %06d", blink_status, accel_values.x, accel_values.y, accel_values.z);
-            control_motor(&accel_values, &min_values, &max_values);
-        }
         k_sleep(K_MSEC(RUN_LED_BLINK_INTERVAL));
     }
 }

@@ -10,9 +10,8 @@ target_sources(app PRIVATE src/main.c)
 # Custom files and folders
 
 target_sources(app PRIVATE
-    src/custom_files/mpu_sensor.c
-    src/custom_files/remote.c;
-    src/custom_files/motor_control.c
+    src/custom_files/motor_control.c;
+    src/custom_files/remote.c
 )
 
 zephyr_library_include_directories(src/custom_files)

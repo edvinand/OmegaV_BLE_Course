@@ -1,20 +1,14 @@
-&i2c0 {
-    status = "okay";
-    compatible = "nordic,nrf-twim";
-    clock-frequency = < I2C_BITRATE_STANDARD >;
-};
-
 &pinctrl {
     pwm0_custom: pwm0_custom {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             nordic,invert;
         };
     };
 
     pwm0_csleep: pwm0_csleep {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             low-power-enable;
         };
     };
