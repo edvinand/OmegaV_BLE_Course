@@ -22,10 +22,11 @@ static struct bt_conn *current_conn;
 
 /* Declarations */
 
-volatile int motor_angle    = 1500000;
-#define MEAN_DUTY_CYCLE       1400000
-#define MAX_DUTY_CYCLE        2400000
-#define MIN_DUTY_CYCLE         400000
+
+#define MEAN_DUTY_CYCLE       1500000
+#define MAX_DUTY_CYCLE        2000000
+#define MIN_DUTY_CYCLE        1000000
+volatile int motor_angle    = MEAN_DUTY_CYCLE;
 
 void on_connected(struct bt_conn *conn, uint8_t err);
 void on_disconnected(struct bt_conn *conn, uint8_t reason);
@@ -55,10 +56,10 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
     LOG_INF("Data: %s", temp_str);
 
     if (data[0] == 0x00) {
-        // set_motor_angle(1);
+        set_motor_angle(MIN_DUTY_CYCLE);
     }
     else if (data[0] == 0x01) {
-        // set_motor_angle(2);
+        set_motor_angle(MAX_DUTY_CYCLE);
     }
 }
 
@@ -101,11 +102,11 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
 		{
 			case DK_BTN1_MSK:
 				button_pressed = 1;
-                err = set_motor_angle(1000000);
+                err = set_motor_angle(MIN_DUTY_CYCLE);
 				break;
 			case DK_BTN2_MSK:
 				button_pressed = 2;
-                err = set_motor_angle(1333000);
+                err = set_motor_angle(MAX_DUTY_CYCLE);
 				break;
 			case DK_BTN3_MSK:
                 button_pressed = 3;
