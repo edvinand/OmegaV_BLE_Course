@@ -394,7 +394,7 @@ pwm_led0 default configuration |
 <img src="https://github.com/edvinand/OmegaV_BLE_Course/blob/main/images/pwm_led0_dts.PNG"> |
 
 
-While it would be possible, we don't want to change anything inside this file, because those changes will stick to all other projects that are using the same board file. This is why we want to do the changes in our overlay file, just like we did with our I2C. Unfortunately, the pin number is not set here directly. It is set in &pwm0 inside pwm_led0. But since the default configuration for pwm_led0 is PWM_POLARITY_INVERTED, and we want to change that as well, we need to add the pwmleds snippet to our overlay file as well. 
+As mentioned, we don't want to change anything inside this file, because those changes will stick to all other projects that are using the same board file. This is why we want to do the changes in our overlay file. Unfortunately, the pin number is not set here directly. It is set in &pwm0 inside pwm_led0. But since the default configuration for pwm_led0 is PWM_POLARITY_INVERTED, and we want to change that as well, we need to add the pwmleds snippet to our overlay file as well. 
 Let us start by adding a pwmleds snippet to our `nrf52840dk_nrf52840.overlay` file. This will overwrite the default settings from the .dts file.
 
 ```C
@@ -436,14 +436,14 @@ You can call them whatever you like. I used pwm0_custom and pwm0_csleep. The las
 &pinctrl {
 	pwm0_default: pwm0_default {
 		group1 {
-			psels = <NRF_PSEL(PWM_OUT0, 0, 13)>;
+			psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
 			nordic,invert;
 		};
 	};
     
 	pwm0_sleep: pwm0_sleep {
 		group1 {
-			psels = <NRF_PSEL(PWM_OUT0, 0, 13)>;
+			psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
 			low-power-enable;
 		};
 	};
@@ -472,7 +472,7 @@ Add this to your `.overlay` file (with the names that you used in `&pwm0`:
 };
 ```
 
-FYI: the `0, 2` is port 0, pin 2. If you wanted to use e.g. pin P1.15, you would set `psels = <NRF_PSEL(PWM_OUT0, 1, 15). 
+FYI: the `0, 3` is port 0, pin 3. If you wanted to use e.g. pin P1.15, you would set `psels = <NRF_PSEL(PWM_OUT0, 1, 15). 
 
 In the end, your `nrf52840dk_nrf52840.overlay` file should look something like this:
 
@@ -486,14 +486,14 @@ In the end, your `nrf52840dk_nrf52840.overlay` file should look something like t
 &pinctrl {
     pwm0_custom: pwm0_custom {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             nordic,invert;
         };
     };
 
     pwm0_csleep: pwm0_csleep {
         group1 {
-            psels = <NRF_PSEL(PWM_OUT0, 0, 2)>;
+            psels = <NRF_PSEL(PWM_OUT0, 0, 3)>;
             low-power-enable;
         };
     };
