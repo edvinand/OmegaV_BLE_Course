@@ -542,7 +542,6 @@ Because we want to keep our main.c clean, we will try to do most of the bluetoot
 
 target_sources(app PRIVATE
     src/custom_files/motor_control.c;
-    src/custom_files/mpu_sensor.c;
     src/custom_files/remote.c
 )
 
