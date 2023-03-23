@@ -20,7 +20,7 @@ As mentioned in the prerequisites, you'll need:
 
 </br>
 
-This tutorial will show you how to create a custom service with two custom value characteristics. One which the central can read and subscribe to (notifications) and one that the central can write to. We will be using the nRF Connect SDK (v2.1.2 or later). This tutorial can be seen as a practical implementations of the guides:
+This tutorial will show you how to create a custom service with two custom value characteristics. One which the central can read and subscribe to (notifications) and one that the central can write to. We will be using the nRF Connect SDK (v2.3.0 or later). This tutorial can be seen as a practical implementations of the guides:
 - [Bluetooth low energy Advertising, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-advertising-a-beginners-tutorial)
 - [Bluetooth low energy Services, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-services-a-beginners-tutorial)
 - [Bluetooth low energy Characteristics, a beginner's tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-characteristics-a-beginners-tutorial)
@@ -34,7 +34,7 @@ The aim of this tutorial is to simply create one service with two characteristic
 # Tutorial Steps
 ### Step 1 - Getting started
 
-**Note:** Most of the screenshots will say that we are using NCS v1.9.0. You should use the latest stable release, which is currently v2.1.2.
+**Note:** Most of the screenshots will say that we are using NCS v1.9.0. You should use the latest stable release, which is currently v2.3.0.
 
 If you haven't done it already, start by setting up nRF Connect for Visual Studio code by setting the environment parameters. Under the nRF Connect tab in Visual Studio Code (VSC) click "Open welcome page" and click "Quick Setup". 
 Visual Studio Code settings | 
@@ -83,7 +83,7 @@ A popup will occur with some UART settings. Just hit the enter key to select *11
 *Hello World! nrf52840dk_nrf52840*
 
 ### Step 2 - Enabling some basic application features
-Congratulations! You have built and flashed our first application. Let's move on by doing some minor modifications. If you explore some of the samples from the *nrf* folder in NCS, you'll see that most of them use our logging module, which is what we will use as well. In order to do so, please replace the line `#include <sys/printk.h>` with `#include <logging/log.h>`. In order to use the log module, we need to add a few things in the prj.conf file. You will find it from the application tab (called remote_controller if you didn't change it) -> Input files -> prj.conf. At this point, it should just say `#nothing here`.
+Congratulations! You have built and flashed our first application. Let's move on by doing some minor modifications. If you explore some of the samples from the *nrf* folder in NCS, you'll see that most of them use our logging module, which is what we will use as well. In order to do so, please replace the line `#include <sys/printk.h>` with `#include <zephyr/logging/log.h>`. In order to use the log module, we need to add a few things in the prj.conf file. You will find it from the application tab (called remote_controller if you didn't change it) -> Input files -> prj.conf. At this point, it should just say `#nothing here`.
 </br>
 Add the following:
 ```
@@ -190,7 +190,7 @@ At this point, your main.c file should look something like this. You can use thi
  */
 
 #include <zephyr.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include <dk_buttons_and_leds.h>
 
 #define LOG_MODULE_NAME app
@@ -287,7 +287,7 @@ If all goes well, the project should compile, and we should be able to see our m
 Open `motor_control.h` and add:
 ```C
 #include <zephyr.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 ```
 
 **Challenge:** </br>
@@ -562,7 +562,7 @@ And in `remote.h`, add the following:
 
 ```C
 #include <zephyr.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 ```
 
 Now, try to create a function called `bluetooth_init()` in your remote.c file that you also need to declare in remote.h. Make the function return `0`, and check this return value in `main()`. Just like before, add whatever is needed in these two files so that you can use this function to log "Initializing Bluetooth". Remember to include remote.h from your main.c file.
