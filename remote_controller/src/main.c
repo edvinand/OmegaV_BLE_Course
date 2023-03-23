@@ -5,7 +5,7 @@
  */
 
 #include <zephyr.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include <dk_buttons_and_leds.h>
 #include "motor_control.h"
 #include "remote.h"
